@@ -1,0 +1,6 @@
+nohup: ignorando entrada
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+Warning: Permanently added 'serveo.net' (RSA) to the list of known hosts.
+[32mForwarding HTTP traffic from https://dbe6c1948852770f-189-7-87-132.serveousercontent.com
+[0m[33mTip (1): Create an account to reserve names. Pro removes the warning page: https://console.serveo.net/settings?n=1&src=ssh_nudge&v=A
+[0m

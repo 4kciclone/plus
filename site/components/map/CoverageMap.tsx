@@ -135,7 +135,6 @@ export default function CoverageMap() {
             </div>
           </div>
         ) : (
-          // @ts-expect-error types
           <MapComponents.MapContainer
             center={[-22.2500, -43.7100]}
             zoom={14}
