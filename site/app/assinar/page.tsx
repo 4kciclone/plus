@@ -8,9 +8,11 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Check, QrCode, FileText, Loader2 } from "lucide-react";
 
+import { Suspense } from "react";
+
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
-export default function AssinarPage() {
+function AssinarContent() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -200,7 +202,19 @@ export default function AssinarPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </>
+  );
+}
+
+export default function AssinarPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F4F5F7] pt-[120px] pb-20 flex flex-col items-center justify-center gap-4">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-neutral-500 font-medium">Carregando checkout...</p>
+      </div>
+    }>
+      <AssinarContent />
+    </Suspense>
   );
 }
