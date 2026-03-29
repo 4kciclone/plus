@@ -20,7 +20,7 @@ class SupportScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Row(
           children: [
-            Hero(tag: 'hero-Suporte & IA', child: Icon(LucideIcons.headset, color: Colors.white)),
+            Hero(tag: 'hero-Suporte & IA', child: Icon(LucideIcons.headphones, color: Colors.white)),
             SizedBox(width: 12),
             Text('Suporte Tecnico', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
@@ -141,7 +141,7 @@ class SupportScreen extends ConsumerWidget {
   List<String> _parseOptions(String? val) {
     if (val == null) return [];
     try {
-      final List l = (val as dynamic) is String ? [] : val; // Actually JSON array normally
+      final List l = (val is String) ? [] : (val as List); // Actually JSON array normally
       return ['Amanhã - Manhã', 'Amanhã - Tarde']; // Mock fallback for quick visualization
     } catch (e) { return []; }
   }
@@ -164,7 +164,7 @@ class _StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-      child: Text(label, style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.black, letterSpacing: 1)),
+      child: Text(label, style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
     );
   }
 }

@@ -18,6 +18,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     PushNotificationService.initialize(context);
   }
 
+  void _startSelfHealing() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Colors.black87,
+      builder: (context) => const _SelfHealingDialog(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
@@ -165,7 +174,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                 children: [
                    _QuickActionCard(icon: LucideIcons.receipt, title: 'Faturas', color: colors.surface, onTap: () => context.push('/invoices')),
                    _QuickActionCard(icon: LucideIcons.gauge, title: 'Speedtest', color: colors.surface, onTap: () => context.push('/connection')),
-                   _QuickActionCard(icon: LucideIcons.headset, title: 'Suporte & IA', color: colors.surface, onTap: () => context.push('/support')),
+                   _QuickActionCard(icon: LucideIcons.headphones, title: 'Suporte & IA', color: colors.surface, onTap: () => context.push('/support')),
                    _QuickActionCard(icon: LucideIcons.router, title: 'Meu Wi-Fi', color: colors.surface, onTap: () => context.push('/wifi')),
                 ],
               ),

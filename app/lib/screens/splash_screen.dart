@@ -36,8 +36,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
     // Wait an extra second for user to appreciate the glow
     await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
-    final token = ref.read(authProvider).token;
-    if (token != null) {
+    final user = ref.read(authProvider).user;
+    if (user != null) {
       context.go('/home');
     } else {
       context.go('/login');

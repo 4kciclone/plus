@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final apiProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:3001', // Localhost alias for Android Emulator
+    baseUrl: 'https://dbe6c1948852770f-189-7-87-132.serveousercontent.com', // Serveo SSH Tunnel for Mobile Device Testing
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ));
