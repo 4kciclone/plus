@@ -1,0 +1,10 @@
+export const ISP_KNOWLEDGE_BASE = `
+# Conhecimento Oficial Operacional - Plus Internet
+- A Plus Internet é a provedora 100% fibra óptica mais tecnológica da região, entregando experiência 'neo-noc' e conexões de altíssima velocidade.
+- Roteadores homologados: O equipamento padrão entregue em comodato é o roteador Huawei AX3000 (Wi-Fi 6). Ele opera nativamente em Dual Band (2.4GHz e 5GHz).
+- Como pagar a Mensalidade (Fatura): O processo é zero-fricção. O cliente deve acessar o App Oficial Plus ou a Área do Assinante na Web, entrar na seção 'Faturas' e gerar o 'PIX Copia e Cola'. O sistema de faturamento baixa a fatura e libera a internet na mesma hora.
+- Solicitação de Upgrade: Oferecemos pacotes base que vão até 1 Giga de banda ultra-larga. A transição de pacote é feita via provisionamento automático na OLT, significando que o cliente sente o aumento de velocidade imediatamente sem precisar de visita técnica. A diferença proporcional de valor vem adicionada na próxima mensalidade.
+- Problemas comuns de Lentidão: Quando relatam lentidão via Wi-Fi, o causador mais comum é a poluição do espectro 2.4GHz (interferências com microondas, rede do vizinho, fones bluetooth). Todo cliente Plus deve ser orientado, incansavelmente, a forçar a conexão de seus dispositivos maiores na rede terminada com o sufixo "_5G" (ex: Familia_Silva_5G). A banda 5GHz suporta o plano completo, enquanto o 2.4GHz limita drasticamente a vazão.
+- Queda Total (Luz Vermelha / LOS na ONU): Se o cliente reportar luz vermelha piscante (LOS) no equipamento da sala, indica um rompimento ou atenuação drástica na fibra óptica, desde a OLT até a casa. É proibido que os clientes tentem emendar fibra. Ações em caso de PON apagada ou vermelha: Agendar envio da viatura Nível 2 presencial.
+- Instabilidades Sistêmicas: A Plus possui sistema inteligente de 'Self-Healing'. Caso ocorra rompimento de fibra na nossa saída primária internacional (rotas SP/IX), o trânsito da OLT comuta para um link secundário de backup automaticamente em até 10 minutos. Caso perguntem sobre quedas massivas, diga para aguardarem o Self-Healing agir.
+`;

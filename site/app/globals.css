@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #E10098;
+  --color-primary-dark: #B30078;
+  --color-background: #F4F5F7;
+  --color-surface: #ffffff;
+  --color-success: #00e676;
+  --color-foreground: #111;
+  --color-muted: #94a3b8;
+  --font-sans: var(--font-dm-sans), sans-serif;
+  --font-sora: var(--font-sora), sans-serif;
+}
+
+@utility font-heading {
+  font-family: var(--font-sora);
+}
+
+body {
+  background: #F4F5F7;
+  color: #111;
+  font-family: var(--font-sans);
+}
+
+/* Smooth scroll for anchor links */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Button active state for all buttons */
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Transition for all interactive elements */
+a, button {
+  transition: all 0.2s ease;
+}
+
+/* Hide scrollbar for plan cards */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

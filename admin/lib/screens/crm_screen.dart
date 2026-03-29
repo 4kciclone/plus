@@ -1,0 +1,134 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+
+class CrmScreen extends ConsumerWidget {
+  const CrmScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+
+    // Mock data for Desktop DataGrid
+    final clients = [
+      {'name': 'Ana Silva', 'cpf': '123.456.789-00', 'plan': 'Gamer 1 Giga', 'status': 'ACTIVE'},
+      {'name': 'João Souza', 'cpf': '987.654.321-11', 'plan': 'Plus 500 Mega', 'status': 'ACTIVE'},
+      {'name': 'Carlos Maia', 'cpf': '456.123.789-22', 'plan': 'Gamer 1 Giga', 'status': 'PENDING_INSTALL'},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('CRM de Assinantes', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            ElevatedButton.icon(
+              onPressed: () {},
+              icon: const Icon(LucideIcons.userPlus),
+              label: const Text('Novo Assinante'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Expanded(
+          child: Card(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 300),
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(colors.surface),
+                  columns: const [
+                    DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('CPF', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Plano', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+                    DataColumn(label: Text('Ações', style: TextStyle(fontWeight: FontWeight.bold))),
+                  ],
+                  rows: clients.map((c) {
+                    final isActive = c['status'] == 'ACTIVE';
+                    return DataRow(
+                      cells: [
+                        DataCell(Text(c['name']!)),
+                        DataCell(Text(c['cpf']!)),
+                        DataCell(Text(c['plan']!)),
+                        DataCell(
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isActive ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              c['status']!,
+                              style: TextStyle(color: isActive ? Colors.green : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        DataCell(
+                          Row(
+                            children: [
+                              IconButton(icon: const Icon(LucideIcons.edit, size: 18), onPressed: () {}),
+                              IconButton(
+                                icon: const Icon(LucideIcons.userX, size: 18, color: Colors.red),
+                                tooltip: 'Cancelamento Inteligente',
+                                onPressed: () => _showCancellationWizard(context, c['name']!),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showCancellationWizard(BuildContext context, String clientName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Cancelar Assinatura - $clientName'),
+        content: SizedBox(
+          width: 500,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('O sistema verificará multas contratuais e agendará o recolhimento do equipamento com o técnico.'),
+              const SizedBox(height: 16),
+              TextField(
+                decoration: const InputDecoration(labelText: 'Motivo do Cancelamento', border: OutlineInputBorder()),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 16),
+              const ListTile(
+                leading: Icon(LucideIcons.alertTriangle, color: Colors.orange),
+                title: Text('Aviso de Multa: R\$ 240,00', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
+                subtitle: Text('Faltam 4 meses para o fim da fidelidade.'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Voltar')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            child: const Text('Confirmar Bloqueio e Cancelamento'),
+          ),
+        ],
+      ),
+    );
+  }
+}
