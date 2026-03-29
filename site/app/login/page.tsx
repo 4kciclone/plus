@@ -6,7 +6,9 @@ import { useAuth } from "@/lib/auth-context";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
-export default function LoginPage() {
+import { Suspense } from "react";
+
+function LoginContent() {
   const { login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -70,7 +72,18 @@ export default function LoginPage() {
           </p>
         </div>
       </main>
-      <Footer />
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F4F5F7] pt-[120px] pb-20 flex flex-col items-center justify-center gap-4">
+        <p className="text-neutral-500 font-medium">Carregando...</p>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }
