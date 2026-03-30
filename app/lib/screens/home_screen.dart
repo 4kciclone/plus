@@ -41,10 +41,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     final userName = user != null ? user['name'].split(' ')[0] : 'Cliente';
     final ticketsOpt = ref.watch(myTicketsProvider);
     
-    final activeTicket = ticketsOpt.whenOrNull(
+    final Map<String, dynamic>? activeTicket = ticketsOpt.whenOrNull(
       data: (tickets) {
         try {
-          return tickets.firstWhere((t) => t['status'] == 'SCHEDULED');
+          return tickets.firstWhere((t) => t['status'] == 'SCHEDULED') as Map<String, dynamic>;
         } catch (_) {
           return null;
         }
