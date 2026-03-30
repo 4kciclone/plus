@@ -18,14 +18,14 @@ class InvoicesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Hero(tag: 'hero-Faturas', child: Icon(LucideIcons.receipt, color: Colors.white)),
-            SizedBox(width: 12),
-            Text('Minhas Faturas', style: TextStyle(fontWeight: FontWeight.bold)),
+            Hero(tag: 'hero-Faturas', child: Icon(LucideIcons.receipt, color: colors.primary)),
+            const SizedBox(width: 12),
+            const Text('Minhas Faturas', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
-        backgroundColor: Colors.transparent,
       ),
       body: invoicesOpt.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -36,10 +36,10 @@ class InvoicesScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(LucideIcons.checkCircle, size: 60, color: colors.primary.withOpacity(0.5)),
+                  Icon(LucideIcons.checkCircle, size: 60, color: colors.primary.withOpacity(0.2)),
                   const SizedBox(height: 16),
-                  const Text('Tudo em dia!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  Text('Você não tem faturas no momento.', style: TextStyle(color: Colors.white.withOpacity(0.6))),
+                  Text('Tudo em dia!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colors.onSurface)),
+                  Text('Você não tem faturas no momento.', style: TextStyle(color: Colors.grey.shade600)),
                 ],
               ),
             );
@@ -51,60 +51,62 @@ class InvoicesScreen extends ConsumerWidget {
             itemBuilder: (context, index) {
               final inv = invoices[index];
               final isPending = inv['status'] == 'PENDING';
-              return Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: colors.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: isPending ? colors.primary.withOpacity(0.3) : Colors.transparent),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'R\$ ${inv['amount'].toStringAsFixed(2).replaceFirst('.', ',')}',
-                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isPending ? Colors.orange.withOpacity(0.2) : Colors.green.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: isPending ? colors.secondary.withOpacity(0.3) : Colors.grey.shade200),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'R\$ ${inv['amount'].toStringAsFixed(2).replaceFirst('.', ',')}',
+                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: colors.onSurface),
                           ),
-                          child: Text(
-                            isPending ? 'Pendente' : 'Pago',
-                            style: TextStyle(
-                              color: isPending ? Colors.orangeAccent : Colors.greenAccent,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: isPending ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            child: Text(
+                              isPending ? 'Pendente' : 'Pago',
+                              style: TextStyle(
+                                color: isPending ? Colors.orange.shade800 : Colors.green.shade800,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Vencimento: ${DateTime.parse(inv['dueDate']).day.toString().padLeft(2, '0')}/${DateTime.parse(inv['dueDate']).month.toString().padLeft(2, '0')}/${DateTime.parse(inv['dueDate']).year}',
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                      if (isPending && inv['pixCode'] != null) ...[
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(LucideIcons.copy, size: 16),
+                          label: const Text('COPIAR PIX', style: TextStyle(fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.secondary,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size(double.infinity, 48),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
                           ),
                         ),
                       ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Vencimento: ${DateTime.parse(inv['dueDate']).day.toString().padLeft(2, '0')}/${DateTime.parse(inv['dueDate']).month.toString().padLeft(2, '0')}/${DateTime.parse(inv['dueDate']).year}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6)),
-                    ),
-                    if (isPending && inv['pixCode'] != null) ...[
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(LucideIcons.copy, size: 16),
-                        label: const Text('COPIAR PIX'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colors.primary,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(double.infinity, 48),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               );

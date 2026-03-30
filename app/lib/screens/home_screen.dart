@@ -3,6 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../services/notification_service.dart';
+import '../services/api_service.dart';
+import '../providers/auth_provider.dart';
+
+final myTicketsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
+  final res = await ref.read(apiProvider).get('/tickets/my');
+  return res.data;
+});
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -30,6 +37,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final user = ref.watch(authProvider).user;
+    final userName = user != null ? user['name'].split(' ')[0] : 'Cliente';
+    final ticketsOpt = ref.watch(myTicketsProvider);
+    
+    final activeTicket = ticketsOpt.whenOrNull(
+      data: (tickets) {
+        try {
+          return tickets.firstWhere((t) => t['status'] == 'SCHEDULED');
+        } catch (_) {
+          return null;
+        }
+      }
+    );
 
     return Scaffold(
       body: SafeArea(
@@ -47,23 +67,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     children: [
                       Text(
                         'Bom dia,',
-                        style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 14),
+                        style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                       ),
-                      const Text(
-                        'Paulo Cezar 👋',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.white),
+                      Text(
+                        '$userName 👋',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: colors.onSurface),
                       ),
                     ],
                   ),
-                  CircleAvatar(
-                    backgroundColor: colors.surface,
-                    child: Icon(LucideIcons.user, color: colors.primary),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 4)],
+                        ),
+                        child: IconButton(
+                          onPressed: () => context.push('/notifications'),
+                          icon: const Icon(LucideIcons.bell),
+                          color: colors.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      GestureDetector(
+                        onTap: () => context.push('/profile'),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Icon(LucideIcons.user, color: colors.primary),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
               const SizedBox(height: 32),
 
-              // Network Status Card
+              // Network Status Card (Corporate Telecom Look)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(24),
@@ -71,7 +111,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                   color: colors.primary,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: colors.primary.withOpacity(0.3), blurRadius: 24, offset: const Offset(0, 12)),
+                    BoxShadow(color: colors.primary.withOpacity(0.2), blurRadius: 20, offset: const Offset(0, 8)),
                   ],
                 ),
                 child: Column(
@@ -90,79 +130,71 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                             children: [
                               Icon(LucideIcons.wifi, size: 14, color: Colors.white),
                               SizedBox(width: 6),
-                              Text('CONECTADO', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                              Text('CONECTADO', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1)),
                             ],
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    const Text('Plus Gamer 1 Giga', style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
-                    Text('Sua conexão está excelente.', style: TextStyle(color: Colors.white.withOpacity(0.8))),
+                    const Text('Plano Plus 1 Giga', style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900)),
+                    Text('Sua conexão OLT está excelente.', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13)),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
 
-              // FEATURE 4: Live Activity Tracker (Mocked State)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.white.withOpacity(0.05)),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: Colors.blueAccent.withOpacity(0.2),
-                        shape: BoxShape.circle,
+              // FEATURE 4: Live Activity Tracker (REAL DATA)
+              if (activeTicket != null) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade200),
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          color: colors.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(LucideIcons.truck, color: colors.primary, size: 20),
                       ),
-                      child: const Icon(LucideIcons.truck, color: Colors.blueAccent, size: 20),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(color: Colors.greenAccent, shape: BoxShape.circle),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text('TÉCNICO A CAMINHO', style: TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          const Text('Bruno chega em 12 minutos', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          // Mini Progress Bar
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: 0.75,
-                              backgroundColor: Colors.white.withOpacity(0.1),
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.greenAccent),
-                              minHeight: 4,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(color: colors.secondary, shape: BoxShape.circle),
+                                ),
+                                const SizedBox(width: 6),
+                                Text('VISITA AGENDADA', style: TextStyle(color: colors.secondary, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 4),
+                            Text('Técnico às ${activeTicket['visitScheduled']}', style: TextStyle(color: colors.onSurface, fontSize: 14, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 32),
+                const SizedBox(height: 32),
+              ],
 
               // Quick Actions Grid
-              Text('Acesso Rápido', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+              Text('Acesso Rápido', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colors.onSurface)),
               const SizedBox(height: 16),
               GridView.count(
                 crossAxisCount: 2,
@@ -172,10 +204,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                 crossAxisSpacing: 16,
                 childAspectRatio: 1.2,
                 children: [
-                   _QuickActionCard(icon: LucideIcons.receipt, title: 'Faturas', color: colors.surface, onTap: () => context.push('/invoices')),
-                   _QuickActionCard(icon: LucideIcons.gauge, title: 'Speedtest', color: colors.surface, onTap: () => context.push('/connection')),
-                   _QuickActionCard(icon: LucideIcons.headphones, title: 'Suporte & IA', color: colors.surface, onTap: () => context.push('/support')),
-                   _QuickActionCard(icon: LucideIcons.router, title: 'Meu Wi-Fi', color: colors.surface, onTap: () => context.push('/wifi')),
+                   _QuickActionCard(icon: LucideIcons.receipt, title: 'Faturas', color: Colors.white, onTap: () => context.push('/invoices')),
+                   _QuickActionCard(icon: LucideIcons.gauge, title: 'Diagnóstico', color: Colors.white, onTap: () => context.push('/connection')),
+                   _QuickActionCard(icon: LucideIcons.headphones, title: 'Suporte', color: Colors.white, onTap: () => context.push('/support')),
+                   _QuickActionCard(icon: LucideIcons.router, title: 'Meu Wi-Fi', color: Colors.white, onTap: () => context.push('/wifi')),
                 ],
               ),
             ],
@@ -206,7 +238,8 @@ class _QuickActionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
       ),
       child: Material(
         color: Colors.transparent,
@@ -223,7 +256,7 @@ class _QuickActionCard extends StatelessWidget {
                   tag: 'hero-$title',
                   child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 28),
                 ),
-                Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                Text(title, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 13)),
               ],
             ),
           ),
@@ -233,7 +266,8 @@ class _QuickActionCard extends StatelessWidget {
   }
 }
 
-// FEATURE 5: Self-Healing Dialog
+// FEATURE 5: Self-Healing Dialog (Corporate Light Theme update)
+// Maintaining animation architecture with standard white backgrounds
 class _SelfHealingDialog extends StatefulWidget {
   const _SelfHealingDialog();
 
@@ -285,6 +319,7 @@ class _SelfHealingDialogState extends State<_SelfHealingDialog> with SingleTicke
   @override
   Widget build(BuildContext context) {
     bool isDone = _currentStep == 4;
+    final colors = Theme.of(context).colorScheme;
 
     return Center(
       child: Material(
@@ -293,11 +328,10 @@ class _SelfHealingDialogState extends State<_SelfHealingDialog> with SingleTicke
           width: 280,
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: const Color(0xFF15151A),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: Colors.white.withOpacity(0.1)),
             boxShadow: [
-              BoxShadow(color: Theme.of(context).colorScheme.primary.withOpacity(0.2), blurRadius: 40),
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 40),
             ],
           ),
           child: Column(
@@ -316,7 +350,7 @@ class _SelfHealingDialogState extends State<_SelfHealingDialog> with SingleTicke
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.3), width: 3),
+                            border: Border.all(color: colors.primary.withOpacity(0.3), width: 3),
                           ),
                           child: Align(
                             alignment: Alignment.topCenter,
@@ -325,10 +359,10 @@ class _SelfHealingDialogState extends State<_SelfHealingDialog> with SingleTicke
                               height: 8,
                               margin: const EdgeInsets.all(2),
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
+                                color: colors.primary,
                                 shape: BoxShape.circle,
                                 boxShadow: [
-                                  BoxShadow(color: Theme.of(context).colorScheme.primary, blurRadius: 10)
+                                  BoxShadow(color: colors.primary.withOpacity(0.5), blurRadius: 10)
                                 ],
                               ),
                             ),
@@ -339,12 +373,12 @@ class _SelfHealingDialogState extends State<_SelfHealingDialog> with SingleTicke
                       width: 56,
                       height: 56,
                       decoration: BoxDecoration(
-                        color: isDone ? Colors.greenAccent.withOpacity(0.2) : Colors.white.withOpacity(0.05),
+                        color: isDone ? Colors.green.shade100 : colors.primary.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         isDone ? LucideIcons.check : LucideIcons.sparkles,
-                        color: isDone ? Colors.greenAccent : Colors.white,
+                        color: isDone ? Colors.green.shade700 : colors.primary,
                         size: 28,
                       ),
                     ),
@@ -356,17 +390,17 @@ class _SelfHealingDialogState extends State<_SelfHealingDialog> with SingleTicke
                 _steps[_currentStep],
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isDone ? Colors.greenAccent : Colors.white,
-                  fontSize: 16,
+                  color: isDone ? Colors.green.shade700 : colors.onSurface,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               if (!isDone)
                 Padding(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.only(top: 16),
                   child: LinearProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
-                    backgroundColor: Colors.white.withOpacity(0.1),
+                    valueColor: AlwaysStoppedAnimation<Color>(colors.primary),
+                    backgroundColor: colors.primary.withOpacity(0.1),
                   ),
                 ),
             ],

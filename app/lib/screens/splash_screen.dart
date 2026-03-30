@@ -53,7 +53,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080B12), // Deep App Background
+      backgroundColor: const Color(0xFF660099), // Vivo Purple Background
       body: Center(
         child: AnimatedBuilder(
           animation: _controller,
@@ -78,7 +78,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                         fontWeight: FontWeight.w900,
                         fontStyle: FontStyle.italic,
                         letterSpacing: -2,
-                        color: Color(0xFFFF0080),
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -107,7 +107,7 @@ class _LogoPainter extends CustomPainter {
       ..strokeWidth = 24
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = const Color(0xFFFF0080).withOpacity(glowProgress * 0.4)
+      ..color = Colors.white.withOpacity(glowProgress * 0.2)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
     final Paint outlinePaint = Paint()
@@ -115,18 +115,14 @@ class _LogoPainter extends CustomPainter {
       ..strokeWidth = 14
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFFF8C00), Color(0xFFFF0080), Color(0xFF00BFFF)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Rect.fromLTWH(0, 0, 200, 200));
+      ..color = Colors.white;
 
     final Paint innerPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 14
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = const Color(0xFFFF0080);
+      ..color = Colors.white;
 
     // Triangle Path
     final Path triangle = Path()

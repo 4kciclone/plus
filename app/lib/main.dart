@@ -13,6 +13,10 @@ import 'screens/invoices_screen.dart';
 import 'screens/wifi_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/radar_screen.dart';
+import 'screens/luna_chat_screen.dart';
+import 'screens/profile_screen.dart';
+import 'screens/notifications_screen.dart';
+import 'screens/contracts_screen.dart';
 
 void main() {
   runApp(
@@ -73,24 +77,53 @@ class PlusApp extends ConsumerWidget {
           path: '/radar',
           builder: (context, state) => const RadarScreen(),
         ),
+        GoRoute(
+          path: '/luna_chat',
+          builder: (context, state) => const LunaChatScreen(),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/notifications',
+          builder: (context, state) => const NotificationsScreen(),
+        ),
+        GoRoute(
+          path: '/contracts',
+          builder: (context, state) => const ContractsScreen(),
+        ),
       ],
     );
 
     return MaterialApp.router(
       title: 'Plus App',
-      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA), // Light Gray/Blueish Background
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFF0080),
-          brightness: Brightness.dark,
-          primary: const Color(0xFFFF0080),
-          surface: const Color(0xFF1E293B),
+          seedColor: const Color(0xFF660099), // Vivo Purple
+          brightness: Brightness.light,
+          primary: const Color(0xFF660099),
+          secondary: const Color(0xFFFF0080), // Vibrant Pink Accent
+          surface: Colors.white,
+          onSurface: const Color(0xFF1E293B), // Dark text for cards
         ),
         textTheme: GoogleFonts.interTextTheme(
-          Theme.of(context).textTheme,
-        ).apply(bodyColor: Colors.white, displayColor: Colors.white),
+          ThemeData.light().textTheme,
+        ).apply(bodyColor: const Color(0xFF1E293B), displayColor: const Color(0xFF0F172A)),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Color(0xFF660099)),
+          titleTextStyle: TextStyle(color: Color(0xFF1E293B), fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        cardTheme: CardTheme(
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.grey.withOpacity(0.1))),
+          color: Colors.white,
+        ),
       ),
       routerConfig: router,
     );

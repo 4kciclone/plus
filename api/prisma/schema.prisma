@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -24,6 +24,7 @@ model User {
   subscriptions Subscription[]
   tickets       Ticket[]
   invoices      Invoice[]
+  notifications Notification[]
 }
 
 model Plan {
@@ -53,6 +54,10 @@ model Subscription {
   installationTime String?   // ex: "08:00-12:00"
   startDate       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  
+  wifiSsid        String?  @default("Familia_Plus_5G")
+  wifiPassword    String?  @default("changeme123")
+
   user            User     @relation(fields: [userId], references: [id])
   plan            Plan     @relation(fields: [planId], references: [id])
   cancellation    Cancellation?
@@ -106,4 +111,16 @@ model Cancellation {
   createdAt       DateTime @default(now())
 
   subscription    Subscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String?  // null = broadcast/global alert (e.g. Zabbix)
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  type      String   @default("INFO") // MAINTENANCE, BILLING, INFO
+  createdAt DateTime @default(now())
+
+  user      User?    @relation(fields: [userId], references: [id])
 }

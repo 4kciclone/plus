@@ -11,6 +11,9 @@ import speedtestRoutes from "./routes/speedtest";
 import chatRoutes from "./routes/chat";
 import adminRoutes from "./routes/admin";
 import employeeRoutes from "./routes/employee";
+import wifiRoutes from "./routes/wifi";
+import notificationsRoutes from "./routes/notifications";
+import contractsRoutes from "./routes/contracts";
 
 const app = express();
 
@@ -33,6 +36,9 @@ app.use("/speedtest", speedtestRoutes);
 app.use("/chat", chatRoutes);
 app.use("/admin", adminRoutes);
 app.use("/employee", employeeRoutes);
+app.use("/wifi", wifiRoutes);
+app.use("/notifications", notificationsRoutes);
+app.use("/contracts", contractsRoutes);
 
 // 404 fallback
 app.use((_req, res) => {

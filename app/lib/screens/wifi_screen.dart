@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
+import '../services/api_service.dart';
+
+final wifiConfigProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
+  final res = await ref.read(apiProvider).get('/wifi');
+  return res.data;
+});
 
 class WifiScreen extends ConsumerWidget {
   const WifiScreen({super.key});
@@ -9,17 +15,18 @@ class WifiScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
+    final wifiOpt = ref.watch(wifiConfigProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Hero(tag: 'hero-Meu Wi-Fi', child: Icon(LucideIcons.router, color: Colors.white)),
-            SizedBox(width: 12),
-            Text('Meu Wi-Fi', style: TextStyle(fontWeight: FontWeight.bold)),
+            Hero(tag: 'hero-Meu Wi-Fi', child: Icon(LucideIcons.router, color: colors.primary)),
+            const SizedBox(width: 12),
+            const Text('Meu Wi-Fi', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
-        backgroundColor: Colors.transparent,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -34,25 +41,25 @@ class WifiScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: colors.primary.withOpacity(0.1),
+                      color: colors.primary.withOpacity(0.05),
                     ),
                     child: Icon(LucideIcons.router, size: 60, color: colors.primary),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Roteador Principal - Sala', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text('Roteador Principal', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: colors.onSurface)),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.2),
+                      color: Colors.green.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(LucideIcons.checkCircle, color: Colors.greenAccent, size: 14),
-                        SizedBox(width: 8),
-                        Text('Online via OLT', style: TextStyle(color: Colors.greenAccent, fontWeight: FontWeight.bold, fontSize: 12)),
+                        Icon(LucideIcons.checkCircle, color: Colors.green.shade700, size: 14),
+                        const SizedBox(width: 8),
+                        Text('Online via Fibra', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 12)),
                       ],
                     ),
                   ),
@@ -70,97 +77,114 @@ class WifiScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 icon: const Icon(LucideIcons.scanLine, size: 22),
-                label: const Text('Analisar Sinal com AR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                label: const Text('Mapa de Sinal 3D', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),
             
-            const SizedBox(height: 40),
+            const SizedBox(height: 48),
 
-            // Gerenciamento de Senha
-            const Text('Rede Wi-Fi Principal', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            Card(
-              color: colors.surface,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Nome da Rede (SSID)', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                            const SizedBox(height: 4),
-                            const Text('Familia_Plus_5G', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                        IconButton(onPressed: () {}, icon: const Icon(LucideIcons.edit2, size: 20)),
-                      ],
-                    ),
-                    const Divider(height: 32),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Senha', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                            const SizedBox(height: 4),
-                            const Text('********', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2)),
-                          ],
-                        ),
-                        IconButton(onPressed: () {}, icon: const Icon(LucideIcons.eye, size: 20)),
-                      ],
-                    ),
-                  ],
+            // Gerenciamento de Senha (REAL DB)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Rede Principal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.grey.shade600, letterSpacing: 1.5)),
+                TextButton.icon(
+                  onPressed: wifiOpt.isLoading ? null : () {
+                    if (wifiOpt.value != null) {
+                      _showEditWifiDialog(context, ref, wifiOpt.value!['ssid'], wifiOpt.value!['password']);
+                    }
+                  },
+                  icon: Icon(LucideIcons.edit2, size: 16, color: colors.primary),
+                  label: Text('Editar', style: TextStyle(color: colors.primary)),
                 ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.grey.shade200),
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+              ),
+              child: wifiOpt.when(
+                loading: () => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
+                error: (err, _) => Padding(padding: const EdgeInsets.all(24), child: Center(child: Text('Erro: $err', style: const TextStyle(color: Colors.red)))),
+                data: (wifiData) {
+                  return Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Nome da Rede (SSID)', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text(wifiData['ssid'] ?? 'Desconhecido', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: colors.onSurface)),
+                              ],
+                            ),
+                            Icon(LucideIcons.wifi, color: colors.primary),
+                          ],
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Divider(height: 1),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Senha', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text('********', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2, color: colors.onSurface)),
+                              ],
+                            ),
+                            IconButton(onPressed: () {}, icon: Icon(LucideIcons.eyeOff, color: Colors.grey.shade400, size: 20)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                }
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             
             // Guest Wi-Fi Button
             SizedBox(
               width: double.infinity,
-              height: 56,
-              child: ElevatedButton.icon(
+              height: 64,
+              child: OutlinedButton.icon(
                 onPressed: () => _showGuestWifiDialog(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colors.surface,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: colors.primary.withOpacity(0.3))),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: colors.primary.withOpacity(0.2)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  backgroundColor: colors.primary.withOpacity(0.02),
                   elevation: 0,
                 ),
-                icon: const Icon(LucideIcons.partyPopper, size: 22, color: Colors.yellowAccent),
-                label: const Text('Criar Wi-Fi de Festa (Visitantes)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                icon: Icon(LucideIcons.partyPopper, size: 24, color: colors.secondary),
+                label: Text('Criar Wi-Fi Temporário', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: colors.onSurface)),
               ),
             ),
-            
-            const SizedBox(height: 32),
-
-            // Dispositivos Conectados
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Dispositivos (4)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                TextButton(onPressed: () {}, child: Text('Ver todos', style: TextStyle(color: colors.primary))),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _DeviceTile(icon: LucideIcons.smartphone, name: 'iPhone do Paulo', connection: 'Wi-Fi 5GHz', color: colors, mbps: 12.5),
-            const SizedBox(height: 12),
-            _DeviceTile(icon: LucideIcons.tv, name: 'Smart TV Samsung', connection: 'Wi-Fi 5GHz', color: colors, mbps: 854.2),
-            const SizedBox(height: 12),
-            _DeviceTile(icon: LucideIcons.laptop, name: 'MacBook Pro', connection: 'Wi-Fi 2.4GHz', color: colors, mbps: 45.0),
           ],
         ),
       ),
+    );
+  }
+
+  void _showEditWifiDialog(BuildContext context, WidgetRef ref, String initialSsid, String initialPass) {
+    showDialog(
+      context: context,
+      builder: (context) => _EditWifiDialog(initialSsid: initialSsid, initialPass: initialPass),
     );
   }
 
@@ -173,138 +197,93 @@ class WifiScreen extends ConsumerWidget {
   }
 }
 
-class _DeviceTile extends StatefulWidget {
-  final IconData icon;
-  final String name;
-  final String connection;
-  final ColorScheme color;
-  final double mbps;
-
-  const _DeviceTile({required this.icon, required this.name, required this.connection, required this.color, required this.mbps});
+class _EditWifiDialog extends ConsumerStatefulWidget {
+  final String initialSsid;
+  final String initialPass;
+  const _EditWifiDialog({required this.initialSsid, required this.initialPass});
 
   @override
-  State<_DeviceTile> createState() => _DeviceTileState();
+  ConsumerState<_EditWifiDialog> createState() => _EditWifiDialogState();
 }
 
-class _DeviceTileState extends State<_DeviceTile> {
+class _EditWifiDialogState extends ConsumerState<_EditWifiDialog> {
+  late TextEditingController _ssidCtrl;
+  late TextEditingController _passCtrl;
   bool _isLoading = false;
-  bool _isPaused = false;
 
-  void _togglePause() async {
+  @override
+  void initState() {
+    super.initState();
+    _ssidCtrl = TextEditingController(text: widget.initialSsid);
+    _passCtrl = TextEditingController(text: widget.initialPass);
+  }
+
+  void _save() async {
+    final ssid = _ssidCtrl.text.trim();
+    final pass = _passCtrl.text.trim();
+    if (ssid.isEmpty || pass.length < 8) return;
+
     setState(() => _isLoading = true);
-    // Simulate MikroTik API call to add MAC address to drop rule
-    await Future.delayed(const Duration(milliseconds: 1400));
-    if (!mounted) return;
     
-    setState(() {
-      _isLoading = false;
-      _isPaused = !_isPaused;
-    });
-
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+    try {
+      final res = await ref.read(apiProvider).patch('/wifi', data: {
+        'ssid': ssid,
+        'password': pass,
+      });
+      if (!mounted) return;
+      
+      ref.invalidate(wifiConfigProvider); // refresh UI
+      Navigator.pop(context);
+      
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Row(
           children: [
-            Icon(_isPaused ? LucideIcons.ban : LucideIcons.checkCircle, color: Colors.white, size: 18),
+            const Icon(LucideIcons.checkCircle, color: Colors.white),
             const SizedBox(width: 12),
-            Expanded(child: Text(_isPaused ? 'Internet bloqueada para ${widget.name}' : 'Acesso restaurado para ${widget.name}', style: const TextStyle(fontWeight: FontWeight.bold))),
+            Expanded(child: Text(res.data['message'] ?? 'Concluído', style: const TextStyle(fontWeight: FontWeight.bold))),
           ],
         ),
-        backgroundColor: _isPaused ? Colors.redAccent.shade700 : Colors.green.shade700,
+        backgroundColor: Colors.green.shade700,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.only(bottom: 24, left: 24, right: 24),
-      ),
-    );
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erro: $e', style: const TextStyle(color: Colors.white)), backgroundColor: Colors.redAccent));
+    }
+
+    if (mounted) setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.fastOutSlowIn,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: _isPaused ? Colors.redAccent.withOpacity(0.05) : widget.color.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _isPaused ? Colors.redAccent.withOpacity(0.2) : widget.color.onSurface.withOpacity(0.05)),
-      ),
-      child: Row(
+    return AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Text('Configurar Roteador', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: _isPaused ? Colors.redAccent.withOpacity(0.1) : widget.color.primary.withOpacity(0.1), 
-              borderRadius: BorderRadius.circular(12)
-            ),
-            child: Icon(widget.icon, color: _isPaused ? Colors.redAccent : widget.color.primary, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.name, 
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold, 
-                    decoration: _isPaused ? TextDecoration.lineThrough : null, 
-                    color: _isPaused ? Colors.grey : Colors.white
-                  )
-                ),
-                const SizedBox(height: 4),
-                if (_isPaused)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
-                    child: const Text('ACESSO PAUSADO', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.redAccent, letterSpacing: 0.5)),
-                  )
-                else
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(widget.connection, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                      const SizedBox(height: 6),
-                      // FEATURE 7: DPI Real-time Bandwidth Tracker
-                      Row(
-                        children: [
-                          Icon(LucideIcons.activity, size: 12, color: widget.mbps > 500 ? Colors.redAccent : Colors.greenAccent),
-                          const SizedBox(width: 4),
-                          Text('${widget.mbps} Mbps', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: widget.mbps > 500 ? Colors.redAccent : Colors.greenAccent)),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(2),
-                              child: LinearProgressIndicator(
-                                value: widget.mbps / 1000,
-                                backgroundColor: Colors.white.withOpacity(0.05),
-                                valueColor: AlwaysStoppedAnimation<Color>(widget.mbps > 500 ? Colors.redAccent : Colors.greenAccent),
-                                minHeight: 4,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: _isLoading ? null : _togglePause,
-            icon: _isLoading 
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-              : Icon(_isPaused ? LucideIcons.play : LucideIcons.ban, size: 20, color: _isPaused ? Colors.greenAccent : Colors.redAccent),
-            tooltip: _isPaused ? 'Restaurar Acesso' : 'Bloquear Dispositivo',
-          ),
+          const Text('Essas alterações serão aplicadas instantaneamente no seu roteador (provisionamento remoto).', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          const SizedBox(height: 24),
+          TextField(controller: _ssidCtrl, decoration: const InputDecoration(labelText: 'Nome da Rede (SSID)')),
+          const SizedBox(height: 16),
+          TextField(controller: _passCtrl, decoration: const InputDecoration(labelText: 'Nova Senha (Mín. 8 caracteres)')),
         ],
       ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar', style: TextStyle(color: Colors.grey))),
+        ElevatedButton(
+          onPressed: _isLoading ? null : _save,
+          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Colors.white),
+          child: _isLoading ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Salvar'),
+        ),
+      ],
     );
   }
 }
 
-// FEATURE 6: Guest Wi-Fi Dialog
+// FEATURE 6: Guest Wi-Fi Dialog (Light Corporate Mode)
 class _GuestWifiDialog extends StatefulWidget {
   const _GuestWifiDialog();
 
@@ -318,10 +297,7 @@ class _GuestWifiDialogState extends State<_GuestWifiDialog> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _timerController = AnimationController(
-      vsync: this, 
-      duration: const Duration(hours: 4),
-    );
+    _timerController = AnimationController(vsync: this, duration: const Duration(hours: 4));
     _timerController.reverse(from: 1.0);
   }
 
@@ -345,75 +321,46 @@ class _GuestWifiDialogState extends State<_GuestWifiDialog> with SingleTickerPro
           width: 320,
           padding: const EdgeInsets.all(32),
           decoration: BoxDecoration(
-            color: const Color(0xFF15151A),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: Colors.yellowAccent.withOpacity(0.3)),
-            boxShadow: [
-              BoxShadow(color: Colors.yellowAccent.withOpacity(0.1), blurRadius: 60),
-            ],
+            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 40)],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(LucideIcons.partyPopper, color: Colors.yellowAccent, size: 36),
+              const Icon(LucideIcons.partyPopper, color: Color(0xFFFF0080), size: 36),
               const SizedBox(height: 16),
-              const Text('Wi-Fi de Convidados', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('Wi-Fi de Convidados', style: TextStyle(color: Color(0xFF1E293B), fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
-              const Text('Rede: Familia_Plus_Visitante\nSenha: plusfesta2026', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.5)),
+              Text('Rede: Familia_Plus_Visitante\nSenha: plusfesta2026', textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600, fontSize: 13, height: 1.5)),
               const SizedBox(height: 32),
-              
-              // Mocked QR Code
               Container(
-                width: 180,
-                height: 180,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: const FittedBox(
-                  child: Icon(LucideIcons.qrCode, color: Colors.black),
-                ),
+                width: 180, height: 180, padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), border: Border.all(color: Colors.grey.shade200, width: 2)),
+                child: const FittedBox(child: Icon(LucideIcons.qrCode, color: Colors.black)),
               ),
-              
               const SizedBox(height: 32),
-              // Destructive Timer
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.redAccent.withOpacity(0.3)),
-                ),
+                decoration: BoxDecoration(color: Colors.red.withOpacity(0.05), borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.red.withOpacity(0.1))),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(LucideIcons.timer, color: Colors.redAccent, size: 16),
+                    const Icon(LucideIcons.timer, color: Colors.red, size: 16),
                     const SizedBox(width: 8),
                     AnimatedBuilder(
                       animation: _timerController,
-                      builder: (context, child) {
-                        return Text(
-                          'Expira em $timerString',
-                          style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 1),
-                        );
-                      }
+                      builder: (context, child) => Text('Expira em $timerString', style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 1)),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
               SizedBox(
-                width: double.infinity,
-                height: 48,
+                width: double.infinity, height: 48,
                 child: ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.1),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    elevation: 0,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey.shade100, foregroundColor: Colors.grey.shade800, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), elevation: 0),
                   child: const Text('Fechar', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:go_router/go_router.dart';
+import 'dart:convert';
 import '../services/api_service.dart';
 
-final ticketsProvider = FutureProvider<List<dynamic>>((ref) async {
+final ticketsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final res = await ref.read(apiProvider).get('/tickets/my');
   return res.data;
 });
@@ -18,14 +20,14 @@ class SupportScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Row(
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Hero(tag: 'hero-Suporte & IA', child: Icon(LucideIcons.headphones, color: Colors.white)),
-            SizedBox(width: 12),
-            Text('Suporte Tecnico', style: TextStyle(fontWeight: FontWeight.bold)),
+            Hero(tag: 'hero-Suporte', child: Icon(LucideIcons.headphones, color: colors.primary)),
+            const SizedBox(width: 12),
+            const Text('Suporte Técnico', style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
-        backgroundColor: Colors.transparent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -56,7 +58,7 @@ class SupportScreen extends ConsumerWidget {
                    Text('Diagnóstico de rede instantâneo com Inteligência Artificial.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withOpacity(0.9))),
                    const SizedBox(height: 20),
                    ElevatedButton.icon(
-                     onPressed: () {},
+                     onPressed: () => context.push('/luna_chat'),
                      icon: const Icon(LucideIcons.messageCircle, color: Color(0xFFFF0080)),
                      label: const Text('Iniciar Chat', style: TextStyle(color: Color(0xFFFF0080), fontWeight: FontWeight.bold)),
                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
@@ -82,19 +84,24 @@ class SupportScreen extends ConsumerWidget {
                       final t = tickets[index];
                       return Container(
                         padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(color: colors.surface, borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(
+                          color: Colors.white, 
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.grey.shade200),
+                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(child: Text(t['subject'], style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16))),
+                                Expanded(child: Text(t['subject'], style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w900, fontSize: 16))),
                                 _StatusBadge(status: t['status']),
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(t['message'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.white.withOpacity(0.6))),
+                            Text(t['message'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade600)),
                             
                             if (t['status'] == 'WAITING_USER' && t['visitOptions'] != null)
                               Padding(
@@ -141,8 +148,8 @@ class SupportScreen extends ConsumerWidget {
   List<String> _parseOptions(String? val) {
     if (val == null) return [];
     try {
-      final List l = (val is String) ? [] : (val as List); // Actually JSON array normally
-      return ['Amanhã - Manhã', 'Amanhã - Tarde']; // Mock fallback for quick visualization
+      final List l = jsonDecode(val);
+      return l.map((e) => e.toString()).toList();
     } catch (e) { return []; }
   }
 }
@@ -153,13 +160,13 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color bg = Colors.blue.withOpacity(0.2);
-    Color fg = Colors.blue;
+    Color bg = Colors.blue.withOpacity(0.1);
+    Color fg = Colors.blue.shade700;
     String label = status;
 
-    if (status == 'WAITING_USER') { bg = Colors.orange.withOpacity(0.2); fg = Colors.orangeAccent; label = 'Ação Necessária'; }
-    if (status == 'SCHEDULED') { bg = Colors.green.withOpacity(0.2); fg = Colors.greenAccent; label = 'Agendado'; }
-    if (status == 'RESOLVED') { bg = Colors.white.withOpacity(0.1); fg = Colors.white54; label = 'Resolvido'; }
+    if (status == 'WAITING_USER') { bg = Colors.orange.withOpacity(0.1); fg = Colors.orange.shade800; label = 'Ação Necessária'; }
+    if (status == 'SCHEDULED') { bg = Colors.green.withOpacity(0.1); fg = Colors.green.shade800; label = 'Agendado'; }
+    if (status == 'RESOLVED') { bg = Colors.grey.shade100; fg = Colors.grey.shade600; label = 'Resolvido'; }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

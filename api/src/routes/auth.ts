@@ -80,4 +80,34 @@ router.get("/me", authMiddleware, async (req: AuthRequest, res: Response) => {
   res.json(user);
 });
 
+// PATCH /auth/password
+router.patch("/password", authMiddleware, async (req: AuthRequest, res: Response) => {
+  const schema = z.object({
+    currentPassword: z.string().min(6),
+    newPassword: z.string().min(6),
+  });
+
+  const result = schema.safeParse(req.body);
+  if (!result.success) {
+    res.status(400).json({ error: result.error.flatten() });
+    return;
+  }
+
+  const { currentPassword, newPassword } = result.data;
+  
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (!user || !(await bcrypt.compare(currentPassword, user.password))) {
+    res.status(401).json({ error: "Senha atual incorreta." });
+    return;
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({
+    where: { id: req.userId },
+    data: { password: hashed },
+  });
+
+  res.json({ success: true, message: "Senha atualizada com sucesso." });
+});
+
 export default router;
