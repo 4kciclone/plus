@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final apiProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
     baseUrl: 'https://plus-sqxw.onrender.com', // Render.com Cloud API
-    connectTimeout: const Duration(seconds: 10),
-    receiveTimeout: const Duration(seconds: 10),
+    connectTimeout: const Duration(seconds: 60),
+    receiveTimeout: const Duration(seconds: 60),
   ));
 
   dio.interceptors.add(InterceptorsWrapper(
