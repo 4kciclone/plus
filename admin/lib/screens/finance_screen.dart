@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../services/api_service.dart';
 
 class FinanceScreen extends ConsumerWidget {
   const FinanceScreen({super.key});
@@ -9,11 +10,7 @@ class FinanceScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
 
-    final defaulters = [
-      {'name': 'Roberto Almeida', 'cpf': '111.222.333-44', 'amount': 'R\$ 120,00', 'daysOverdue': 12},
-      {'name': 'Mariana Costa', 'cpf': '555.666.777-88', 'amount': 'R\$ 240,00', 'daysOverdue': 5},
-      {'name': 'Felipe Martins', 'cpf': '999.000.111-22', 'amount': 'R\$ 99,90', 'daysOverdue': 31},
-    ];
+    final invoicesAsync = ref.watch(financeProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,28 +51,42 @@ class FinanceScreen extends ConsumerWidget {
                       ),
                       const Divider(height: 1),
                       Expanded(
-                        child: ListView.separated(
-                          itemCount: defaulters.length,
-                          separatorBuilder: (_, __) => const Divider(height: 1),
-                          itemBuilder: (context, index) {
-                            final d = defaulters[index];
-                            final isCritical = (d['daysOverdue'] as int) > 15;
-                            return ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                              leading: CircleAvatar(
-                                backgroundColor: isCritical ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                                child: Icon(LucideIcons.user, color: isCritical ? Colors.red : Colors.orange),
-                              ),
-                              title: Text(d['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
-                              subtitle: Text('CPF: ${d['cpf']}'),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(d['amount'] as String, style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
-                                  Text('${d['daysOverdue']} dias de atraso', style: TextStyle(color: isCritical ? Colors.red : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
+                        child: invoicesAsync.when(
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (err, stack) => Center(child: Text('Erro ao carregar: $err')),
+                          data: (allInvoices) {
+                            final unpaidInvoices = allInvoices.where((i) => i['paid'] == false).toList();
+                            if (unpaidInvoices.isEmpty) {
+                              return const Center(child: Text('Nenhuma inadimplência pendente.'));
+                            }
+                            return ListView.separated(
+                              itemCount: unpaidInvoices.length,
+                              separatorBuilder: (_, __) => const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final d = unpaidInvoices[index];
+                                final dueDate = DateTime.parse(d['dueDate']);
+                                final diff = DateTime.now().difference(dueDate).inDays;
+                                final daysOverdue = diff > 0 ? diff : 0;
+                                final isCritical = daysOverdue > 15;
+                                
+                                return ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                  leading: CircleAvatar(
+                                    backgroundColor: isCritical ? Colors.red.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                                    child: Icon(LucideIcons.user, color: isCritical ? Colors.red : Colors.orange),
+                                  ),
+                                  title: Text(d['user']['name'] as String, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  subtitle: Text('CPF: ${d['user']['cpf']}'),
+                                  trailing: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text('R\$ ${d['amount'].toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16)),
+                                      Text('$daysOverdue dias de atraso', style: TextStyle(color: isCritical ? Colors.red : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),

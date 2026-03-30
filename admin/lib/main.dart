@@ -4,6 +4,10 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'dart:async';
 import 'dart:math';
 import 'theme_provider.dart';
+import 'screens/crm_screen.dart';
+import 'screens/tickets_screen.dart';
+import 'screens/finance_screen.dart';
+import 'services/api_service.dart';
 
 void main() {
   runApp(
@@ -113,7 +117,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
             destinations: const [
               NavigationRailDestination(icon: Icon(LucideIcons.layoutDashboard), label: Text('Painel')),
               NavigationRailDestination(icon: Icon(LucideIcons.users), label: Text('CRM')),
-              NavigationRailDestination(icon: Icon(LucideIcons.kanbanSquare), label: Text('Chamados')),
+              NavigationRailDestination(icon: Icon(LucideIcons.layout), label: Text('Chamados')),
               NavigationRailDestination(icon: Icon(LucideIcons.wallet), label: Text('Financeiro')),
             ],
           ),
@@ -128,12 +132,15 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         ],
       ),
     );
-class _DashboardOverview extends StatefulWidget {
-  @override
-  State<_DashboardOverview> createState() => _DashboardOverviewState();
+  }
 }
 
-class _DashboardOverviewState extends State<_DashboardOverview> {
+class _DashboardOverview extends ConsumerStatefulWidget {
+  @override
+  ConsumerState<_DashboardOverview> createState() => _DashboardOverviewState();
+}
+
+class _DashboardOverviewState extends ConsumerState<_DashboardOverview> {
   final List<double> _dataPoints = List.generate(20, (index) => 30.0 + Random().nextDouble() * 40.0);
   Timer? _timer;
 
@@ -156,6 +163,40 @@ class _DashboardOverviewState extends State<_DashboardOverview> {
 
   @override
   Widget build(BuildContext context) {
+    final crmAsync = ref.watch(crmProvider);
+    final financeAsync = ref.watch(financeProvider);
+    final ticketsAsync = ref.watch(ticketsProvider);
+
+    String activeClients = '...';
+    String revenue = '...';
+    String openTickets = '...';
+    String defaulters = '...';
+
+    if (crmAsync.hasValue) {
+      final clients = crmAsync.value!;
+      final activeCount = clients.where((c) {
+        final subs = c['subscriptions'] as List<dynamic>? ?? [];
+        return subs.isNotEmpty && subs.first['status'] == 'ACTIVE';
+      }).length;
+      activeClients = activeCount.toString();
+    }
+
+    if (financeAsync.hasValue) {
+      final invoices = financeAsync.value!;
+      final paidInvoices = invoices.where((i) => i['paid'] == true);
+      final totalRevenue = paidInvoices.fold(0.0, (sum, i) => sum + (i['amount'] as num));
+      revenue = 'R\$ ${totalRevenue.toStringAsFixed(2)}';
+
+      final unpaidCount = invoices.where((i) => i['paid'] == false).length;
+      defaulters = unpaidCount.toString();
+    }
+
+    if (ticketsAsync.hasValue) {
+      final tickets = ticketsAsync.value!;
+      // For this overview, we'll count all tickets (or just OPEN ones).
+      openTickets = tickets.length.toString();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -163,13 +204,13 @@ class _DashboardOverviewState extends State<_DashboardOverview> {
         const SizedBox(height: 24),
         Row(
           children: [
-            Expanded(child: _StatCard(title: 'Clientes Ativos', value: '1.247', icon: LucideIcons.users)),
+            Expanded(child: _StatCard(title: 'Clientes Ativos', value: activeClients, icon: LucideIcons.users)),
             const SizedBox(width: 16),
-            Expanded(child: _StatCard(title: 'Faturamento', value: 'R\$ 98.400', icon: LucideIcons.trendingUp)),
+            Expanded(child: _StatCard(title: 'Faturamento', value: revenue, icon: LucideIcons.trendingUp)),
             const SizedBox(width: 16),
-            Expanded(child: _StatCard(title: 'Chamados', value: '7', icon: LucideIcons.alertCircle)),
+            Expanded(child: _StatCard(title: 'Chamados', value: openTickets, icon: LucideIcons.alertCircle)),
             const SizedBox(width: 16),
-            Expanded(child: _StatCard(title: 'Inadimplentes', value: '43', icon: LucideIcons.thumbsDown)),
+            Expanded(child: _StatCard(title: 'Inadimplentes', value: defaulters, icon: LucideIcons.thumbsDown)),
           ],
         ),
         const SizedBox(height: 32),

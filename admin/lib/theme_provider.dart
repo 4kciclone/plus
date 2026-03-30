@@ -35,7 +35,7 @@ class ThemeNotifier extends StateNotifier<AppThemeStyle> {
             foregroundColor: Color(0xFF0F172A),
             elevation: 1,
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: Colors.white,
             elevation: 0,
             shape: RoundedRectangleBorder(
@@ -60,7 +60,7 @@ class ThemeNotifier extends StateNotifier<AppThemeStyle> {
             foregroundColor: Colors.white,
             elevation: 0,
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: const Color(0xFF1E293B),
             elevation: 12,
             shadowColor: const Color(0xFFFF0080).withOpacity(0.2),
@@ -85,7 +85,7 @@ class ThemeNotifier extends StateNotifier<AppThemeStyle> {
             foregroundColor: const Color(0xFF334155),
             elevation: 0,
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: Colors.white.withOpacity(0.6),
             elevation: 0,
             shape: RoundedRectangleBorder(

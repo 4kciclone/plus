@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../services/api_service.dart';
 
 import 'dart:math';
 
@@ -57,10 +58,30 @@ class _TicketsScreenState extends ConsumerState<TicketsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(ticketsProvider, (prev, next) {
+      if (next.hasValue && (prev == null || !prev.hasValue)) {
+        final realTickets = next.value!;
+        setState(() {
+          // Clear mock and inject live Edge data into the triage pipeline
+          _columns['Abertos (Triagem)'] = realTickets.map((t) => "${t['user']['name']}: ${t['issue']}").toList().cast<String>();
+        });
+      }
+    });
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('Quadro de Chamados (O.S.)', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Quadro de Chamados (O.S.)', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            ElevatedButton.icon(
+              onPressed: () => ref.refresh(ticketsProvider),
+              icon: const Icon(LucideIcons.refreshCw, size: 16),
+              label: const Text('Sincronizar Cloud'),
+            ),
+          ],
+        ),
         const SizedBox(height: 24),
         Expanded(
           child: Row(
@@ -216,5 +237,7 @@ class _KanbanColumn extends StatelessWidget {
         ],
       ),
     );
+  },
+);
   }
 }

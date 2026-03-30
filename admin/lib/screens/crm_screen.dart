@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../services/api_service.dart';
 
 class CrmScreen extends ConsumerWidget {
   const CrmScreen({super.key});
@@ -9,12 +10,7 @@ class CrmScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).colorScheme;
 
-    // Mock data for Desktop DataGrid
-    final clients = [
-      {'name': 'Ana Silva', 'cpf': '123.456.789-00', 'plan': 'Gamer 1 Giga', 'status': 'ACTIVE'},
-      {'name': 'João Souza', 'cpf': '987.654.321-11', 'plan': 'Plus 500 Mega', 'status': 'ACTIVE'},
-      {'name': 'Carlos Maia', 'cpf': '456.123.789-22', 'plan': 'Gamer 1 Giga', 'status': 'PENDING_INSTALL'},
-    ];
+    final clientsAsync = ref.watch(crmProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,54 +34,63 @@ class CrmScreen extends ConsumerWidget {
         const SizedBox(height: 24),
         Expanded(
           child: Card(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 300),
-                child: DataTable(
-                  headingRowColor: WidgetStateProperty.all(colors.surface),
-                  columns: const [
-                    DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('CPF', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Plano', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
-                    DataColumn(label: Text('Ações', style: TextStyle(fontWeight: FontWeight.bold))),
-                  ],
-                  rows: clients.map((c) {
-                    final isActive = c['status'] == 'ACTIVE';
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(c['name']!)),
-                        DataCell(Text(c['cpf']!)),
-                        DataCell(Text(c['plan']!)),
-                        DataCell(
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: isActive ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              c['status']!,
-                              style: TextStyle(color: isActive ? Colors.green : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Row(
-                            children: [
-                              IconButton(icon: const Icon(LucideIcons.edit, size: 18), onPressed: () {}),
-                              IconButton(
-                                icon: const Icon(LucideIcons.userX, size: 18, color: Colors.red),
-                                tooltip: 'Cancelamento Inteligente',
-                                onPressed: () => _showCancellationWizard(context, c['name']!),
+            child: clientsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Erro ao carregar CRM: $err')),
+              data: (clients) => SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width - 300),
+                  child: DataTable(
+                    headingRowColor: WidgetStateProperty.all(colors.surface),
+                    columns: const [
+                      DataColumn(label: Text('Nome', style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('CPF', style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('Plano', style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('Status', style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(label: Text('Ações', style: TextStyle(fontWeight: FontWeight.bold))),
+                    ],
+                    rows: clients.map((c) {
+                      final subs = c['subscriptions'] as List<dynamic>? ?? [];
+                      final sub = subs.isNotEmpty ? subs.first : null;
+                      final isActive = sub != null && sub['status'] == 'ACTIVE';
+                      final statusStr = sub != null ? sub['status'] : 'INACTIVE';
+                      final planStr = sub != null && sub['plan'] != null ? sub['plan']['name'] : 'Nenhum';
+
+                      return DataRow(
+                        cells: [
+                          DataCell(Text(c['name'] ?? 'Sem Nome')),
+                          DataCell(Text(c['cpf'] ?? 'Sem CPF')),
+                          DataCell(Text(planStr)),
+                          DataCell(
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: isActive ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ],
+                              child: Text(
+                                statusStr,
+                                style: TextStyle(color: isActive ? Colors.green : Colors.orange, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    );
-                  }).toList(),
+                          DataCell(
+                            Row(
+                              children: [
+                                IconButton(icon: const Icon(LucideIcons.edit, size: 18), onPressed: () {}),
+                                IconButton(
+                                  icon: const Icon(LucideIcons.userX, size: 18, color: Colors.red),
+                                  tooltip: 'Cancelamento Inteligente',
+                                  onPressed: () => _showCancellationWizard(context, c['name'] ?? 'Cliente'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),
