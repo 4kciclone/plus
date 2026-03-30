@@ -38,15 +38,29 @@ router.post("/login", async (req: Request, res: Response) => {
 
 // --- CRM MODULE ---
 router.get("/crm", employeeAuthMiddleware(["ADMIN", "SUPPORT", "FINANCE"]), async (req: EmployeeAuthRequest, res: Response) => {
-  // Fetch users heavily nested for the big CRM specific grid
-  const users = await prisma.user.findMany({
-    include: {
-      subscriptions: {
-        include: { plan: true, cancellation: true }
-      }
-    },
-  });
-  res.json(users);
+  try {
+    // Avoid deeply nested Prisma includes which deadlock PgBouncer on Neon Free Tier
+    const users = await prisma.user.findMany({
+      include: { subscriptions: true },
+    });
+    
+    const plans = await prisma.plan.findMany();
+    const planMap = Object.fromEntries(plans.map(p => [p.id, p]));
+
+    const usersData = users.map(u => ({
+      ...u,
+      subscriptions: u.subscriptions.map(s => ({
+        ...s,
+        plan: planMap[s.planId] || null,
+        cancellation: null
+      }))
+    }));
+
+    res.json(usersData);
+  } catch (err: any) {
+    console.error("CRM Endpoint Fatal Error:", err);
+    res.status(500).json({ error: "Erro interno no servidor." });
+  }
 });
 
 router.post("/cancellations", employeeAuthMiddleware(["ADMIN", "SUPPORT"]), async (req: EmployeeAuthRequest, res: Response) => {
