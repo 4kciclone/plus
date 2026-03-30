@@ -62,7 +62,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       String errorMessage = 'Falha de conexão. A API pode estar acordando (aguarde 50s).';
       if (e.toString().contains('401')) errorMessage = 'Senha ou e-mail inválidos.';
       else if (e.toString().contains('Timeout')) errorMessage = 'Servidor demorou muito para responder. Tente novamente.';
-      else errorMessage = 'Erro: \${e.toString()}';
+      else errorMessage = 'Erro: ${e.toString()}';
       
       state = state.copyWith(isLoading: false, error: errorMessage);
       return false;
