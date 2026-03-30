@@ -22,6 +22,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final user = ref.watch(authProvider).user;
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Minha Conta', style: TextStyle(fontWeight: FontWeight.bold)),
