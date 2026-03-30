@@ -46,6 +46,10 @@ class PlusApp extends ConsumerWidget {
           builder: (context, state) => const SplashScreen(),
         ),
         GoRoute(
+          path: '/home',
+          builder: (context, state) => const HomeScreen(),
+        ),
+        GoRoute(
           path: '/login',
           builder: (context, state) => const LoginScreen(),
         ),
