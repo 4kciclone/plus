@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final apiProvider = Provider<Dio>((ref) {
   final dio = Dio(BaseOptions(
-    baseUrl: 'https://dbe6c1948852770f-189-7-87-132.serveousercontent.com', // Serveo SSH Tunnel for Mobile Device Testing
+    baseUrl: 'https://plus-sqxw.onrender.com', // Render.com Cloud API
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
   ));
