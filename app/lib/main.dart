@@ -119,7 +119,7 @@ class PlusApp extends ConsumerWidget {
           iconTheme: IconThemeData(color: Color(0xFF660099)),
           titleTextStyle: TextStyle(color: Color(0xFF1E293B), fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 0,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.grey.withOpacity(0.1))),
           color: Colors.white,
