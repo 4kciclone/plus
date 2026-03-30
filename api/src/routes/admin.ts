@@ -65,7 +65,7 @@ router.put("/subscriptions/:id", authMiddleware, requireAdmin, async (req: AuthR
   const { status, installationDate } = req.body; // status: ACTIVE, CANCELLED
 
   const sub = await prisma.subscription.update({
-    where: { id },
+    where: { id: String(id) },
     data: { 
       status: String(status), 
       installationDate: installationDate ? new Date(String(installationDate)) : undefined 
@@ -88,7 +88,7 @@ router.put("/tickets/:id", authMiddleware, requireAdmin, async (req: AuthRequest
   const { status, visitOptions } = req.body;
   
   const ticket = await prisma.ticket.update({
-    where: { id },
+    where: { id: String(id) },
     data: { 
       status: status ? String(status) : "RESOLVED",
       visitOptions: visitOptions && Array.isArray(visitOptions) ? JSON.stringify(visitOptions) : undefined
@@ -97,7 +97,7 @@ router.put("/tickets/:id", authMiddleware, requireAdmin, async (req: AuthRequest
   });
 
   if (status === "WAITING_USER") {
-    console.log(`\n[EMAIL] MOCK: Chamada para envio de Email: "Ação Necessária - Escolha o horário da sua Visita Técnica" para ${ticket.user.email}`);
+    console.log(`\n[EMAIL] MOCK: Chamada para envio de Email: "Ação Necessária - Escolha o horário da sua Visita Técnica" para ${(ticket as any).user?.email}`);
   }
 
   res.json(ticket);
