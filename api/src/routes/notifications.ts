@@ -25,7 +25,7 @@ router.get("/", authMiddleware, async (req: AuthRequest, res: Response) => {
 router.patch("/:id/read", authMiddleware, async (req: AuthRequest, res: Response) => {
   const { id } = req.params;
   
-  const notification = await prisma.notification.findUnique({ where: { id } });
+  const notification = await prisma.notification.findUnique({ where: { id: id as string } });
   if (!notification) {
     res.status(404).json({ error: "Notificação não encontrada" });
     return;
@@ -38,7 +38,7 @@ router.patch("/:id/read", authMiddleware, async (req: AuthRequest, res: Response
   }
 
   await prisma.notification.update({
-    where: { id },
+    where: { id: id as string },
     data: { read: true }
   });
 
