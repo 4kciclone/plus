@@ -71,12 +71,15 @@ export default function AreaAssinantePage() {
       RESOLVED: "bg-neutral-100 text-neutral-600",
       CANCELLED: "bg-neutral-100 text-neutral-500 line-through",
       WAITING_USER: "bg-orange-100 text-orange-700 gap-1 animate-pulse",
+      AWAITING_SCHEDULE: "bg-purple-100 text-purple-700 gap-1 animate-pulse",
       SCHEDULED: "bg-blue-100 text-blue-700",
+      PENDING_INSTALL: "bg-yellow-100 text-yellow-700",
     };
     const labels: Record<string, string> = {
       ACTIVE: "Ativo", OPEN: "Aberto", PENDING: "Pendente",
       PAID: "Pago", OVERDUE: "Vencida", RESOLVED: "Resolvido", CANCELLED: "Cancelado",
       WAITING_USER: "Aguardando Agendamento", SCHEDULED: "Agendado",
+      PENDING_INSTALL: "Aguardando Equipe", AWAITING_SCHEDULE: "Escolha seu Horário",
     };
     return (
       <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center ${map[status] || "bg-neutral-100 text-neutral-600"}`}>
@@ -93,7 +96,20 @@ export default function AreaAssinantePage() {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ visitScheduled: slot })
       });
-      loadData(); // Re-fetch all data to refresh state
+      loadData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleScheduleInstallation = async (subId: string, slot: string) => {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/subscriptions/${subId}/schedule`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ chosenSlot: slot })
+      });
+      loadData();
     } catch (e) {
       console.error(e);
     }
@@ -175,10 +191,40 @@ export default function AreaAssinantePage() {
                     </div>
                   </div>
                   <div className="mt-4 pt-4 border-t border-neutral-100 flex flex-wrap gap-2">
-                    {sub.plan.features.split(",").map((f, i) => (
+                    {sub.plan.features.split(",").map((f: string, i: number) => (
                       <span key={i} className="px-3 py-1 bg-neutral-100 text-neutral-700 text-xs font-bold rounded-full">{f}</span>
                     ))}
                   </div>
+
+                  {/* Installation Slot Selection */}
+                  {sub.status === 'AWAITING_SCHEDULE' && (sub as any).installationOptions && (
+                    <div className="mt-4 p-4 border border-purple-200 bg-purple-50/50 rounded-xl">
+                      <p className="font-bold text-sm text-purple-800 mb-3">📅 Escolha o melhor horário para instalação:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(() => {
+                          try {
+                            const opts = JSON.parse((sub as any).installationOptions);
+                            return opts.map((opt: string, idx: number) => (
+                              <button
+                                key={idx}
+                                onClick={() => handleScheduleInstallation(sub.id, opt)}
+                                className="px-4 py-2 bg-white border-2 border-purple-200 text-purple-700 font-bold text-xs rounded-xl hover:bg-purple-100 hover:border-purple-300 transition-colors"
+                              >
+                                {opt}
+                              </button>
+                            ));
+                          } catch(e) { return null; }
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {sub.status === 'SCHEDULED' && (sub as any).installationTime && (
+                    <div className="mt-4 p-3 border border-blue-200 bg-blue-50/50 rounded-xl flex items-center gap-2">
+                      <span className="text-blue-600">📅</span>
+                      <span className="font-bold text-sm text-blue-800">Instalação agendada para: {(sub as any).installationTime}</span>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

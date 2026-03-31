@@ -91,4 +91,34 @@ router.get("/my", authMiddleware, async (req: AuthRequest, res: Response) => {
   res.json(subscriptions);
 });
 
+// PUT /subscriptions/:id/schedule — Client picks an installation slot
+router.put("/:id/schedule", authMiddleware, async (req: AuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { chosenSlot } = req.body;
+
+  if (!chosenSlot) {
+    res.status(400).json({ error: "Slot não informado." });
+    return;
+  }
+
+  try {
+    // Parse the chosen slot: "09/04 09h-12h" -> date + time range
+    const parts = (chosenSlot as string).split(" ");
+    const datePart = parts[0]; // "09/04"
+    const timePart = parts[1] || ""; // "09h-12h"
+
+    const updated = await prisma.subscription.update({
+      where: { id: id as string },
+      data: {
+        status: "SCHEDULED",
+        installationTime: chosenSlot as string,
+      },
+    });
+    res.json({ success: true, subscription: updated });
+  } catch (err: any) {
+    console.error("Schedule error:", err);
+    res.status(500).json({ error: "Erro ao agendar instalação." });
+  }
+});
+
 export default router;

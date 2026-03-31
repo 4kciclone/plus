@@ -83,6 +83,18 @@ app.get("/seed", async (_req, res) => {
   }
 });
 
+// Temporary: add installationOptions column if missing
+app.get("/migrate-installation", async (_req, res) => {
+  try {
+    const { PrismaClient } = require('@prisma/client');
+    const p = new PrismaClient();
+    await p.$executeRawUnsafe(`ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "installationOptions" TEXT`);
+    res.json({ message: "Column installationOptions added successfully." });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 404 fallback
 app.use((_req, res) => {
   res.status(404).json({ error: "Rota não encontrada." });

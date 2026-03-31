@@ -59,6 +59,13 @@ class ApiService {
       'installationDate': DateTime.now().toIso8601String(),
     });
   }
+
+  Future<void> sendInstallationOptions(String id, List<String> slots) async {
+    await loginAdmin();
+    await _dio.put('/subscriptions/$id', data: {
+      'installationOptions': slots,
+    });
+  }
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
