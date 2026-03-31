@@ -51,6 +51,14 @@ class ApiService {
     final res = await _dio.get('/finance');
     return res.data as List<dynamic>;
   }
+
+  Future<void> updateSubscriptionStatus(String id, String status) async {
+    await loginAdmin();
+    await _dio.put('/subscriptions/$id', data: {
+      'status': status,
+      'installationDate': DateTime.now().toIso8601String(),
+    });
+  }
 }
 
 final apiServiceProvider = Provider<ApiService>((ref) => ApiService());

@@ -78,12 +78,20 @@ class CrmScreen extends ConsumerWidget {
                           DataCell(
                             Row(
                               children: [
-                                IconButton(icon: const Icon(LucideIcons.edit, size: 18), onPressed: () {}),
-                                IconButton(
-                                  icon: const Icon(LucideIcons.userX, size: 18, color: Colors.red),
-                                  tooltip: 'Cancelamento Inteligente',
-                                  onPressed: () => _showCancellationWizard(context, c['name'] ?? 'Cliente'),
-                                ),
+                                if (statusStr == 'PENDING_INSTALL')
+                                  IconButton(
+                                    icon: const Icon(LucideIcons.calendarCheck, size: 18, color: Colors.green),
+                                    tooltip: 'Agendar Instalação e Ativar',
+                                    onPressed: () => _showInstallationWizard(context, ref, sub['id'], c['name'] ?? 'Cliente'),
+                                  )
+                                else ...[
+                                  IconButton(icon: const Icon(LucideIcons.edit, size: 18), onPressed: () {}),
+                                  IconButton(
+                                    icon: const Icon(LucideIcons.userX, size: 18, color: Colors.red),
+                                    tooltip: 'Cancelamento Inteligente',
+                                    onPressed: () => _showCancellationWizard(context, c['name'] ?? 'Cliente'),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -131,6 +139,55 @@ class CrmScreen extends ConsumerWidget {
             onPressed: () => Navigator.pop(ctx),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             child: const Text('Confirmar Bloqueio e Cancelamento'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showInstallationWizard(BuildContext context, WidgetRef ref, String subscriptionId, String clientName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Agendar Instalação - $clientName'),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Ao confirmar, a assinatura mudará para Ativa e o equipamento será provisionado na OLT central.'),
+              const SizedBox(height: 16),
+              const ListTile(
+                leading: Icon(LucideIcons.checkCircle, color: Colors.green),
+                title: Text('Status da Fibra: Disponível', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                subtitle: Text('Há portas livres na CTO mais próxima.'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ref.read(apiServiceProvider).updateSubscriptionStatus(subscriptionId, 'ACTIVE');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Instalação Agendada e Plano Ativado com Sucesso!'), backgroundColor: Colors.green),
+                  );
+                }
+                ref.invalidate(crmProvider);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+            child: const Text('Confirmar Instalação'),
           ),
         ],
       ),

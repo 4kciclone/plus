@@ -69,7 +69,7 @@ router.put("/subscriptions/:id", employeeAuthMiddleware(["ADMIN", "SUPPORT", "TE
   
   try {
     const updated = await prisma.subscription.update({
-      where: { id },
+      where: { id: id as string },
       data: { 
         status: status as any, 
         installationDate: installationDate ? new Date(installationDate as string) : undefined 
