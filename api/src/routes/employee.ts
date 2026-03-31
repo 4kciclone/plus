@@ -63,6 +63,24 @@ router.get("/crm", employeeAuthMiddleware(["ADMIN", "SUPPORT", "FINANCE"]), asyn
   }
 });
 
+router.put("/subscriptions/:id", employeeAuthMiddleware(["ADMIN", "SUPPORT", "TECH"]), async (req: EmployeeAuthRequest, res: Response) => {
+  const { id } = req.params;
+  const { status, installationDate } = req.body;
+  
+  try {
+    const updated = await prisma.subscription.update({
+      where: { id },
+      data: { 
+        status: status as any, 
+        installationDate: installationDate ? new Date(installationDate as string) : undefined 
+      }
+    });
+    res.json({ success: true, subscription: updated, message: "Status da Instalação atualizado com sucesso." });
+  } catch (err: any) {
+    res.status(500).json({ error: "Erro ao atualizar assinatura." });
+  }
+});
+
 router.post("/cancellations", employeeAuthMiddleware(["ADMIN", "SUPPORT"]), async (req: EmployeeAuthRequest, res: Response) => {
   const { subscriptionId, reason } = req.body;
   
