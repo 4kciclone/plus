@@ -60,10 +60,24 @@ class ApiService {
     });
   }
 
-  Future<void> sendInstallationOptions(String id, List<String> slots) async {
+  Future<void> sendInstallationOptions(String id, List<String> slots, {String? techId, String? techName}) async {
     await loginAdmin();
-    await _dio.put('/subscriptions/$id', data: {
-      'installationOptions': slots,
+    final data = <String, dynamic>{'installationOptions': slots};
+    if (techId != null) data['assignedTechId'] = techId;
+    if (techName != null) data['assignedTechName'] = techName;
+    await _dio.put('/subscriptions/$id', data: data);
+  }
+
+  Future<List<dynamic>> getEmployees() async {
+    await loginAdmin();
+    final res = await _dio.get('/employees');
+    return res.data as List<dynamic>;
+  }
+
+  Future<void> createEmployee(String name, String email, String password, String role) async {
+    await loginAdmin();
+    await _dio.post('/employees', data: {
+      'name': name, 'email': email, 'password': password, 'role': role,
     });
   }
 }
@@ -84,4 +98,9 @@ final ticketsProvider = FutureProvider<List<dynamic>>((ref) async {
 final financeProvider = FutureProvider<List<dynamic>>((ref) async {
   final api = ref.watch(apiServiceProvider);
   return await api.getInvoices();
+});
+
+final employeesProvider = FutureProvider<List<dynamic>>((ref) async {
+  final api = ref.watch(apiServiceProvider);
+  return await api.getEmployees();
 });

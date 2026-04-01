@@ -114,14 +114,25 @@ class CrmScreen extends ConsumerWidget {
                                       onPressed: () => _showInstallationWizard(context, ref, sub['id'], c['name'] ?? 'Cliente'),
                                     )
                                   else if (statusStr == 'SCHEDULED')
-                                    Tooltip(
-                                      message: sub['installationTime'] ?? '',
-                                      child: const Icon(LucideIcons.checkCircle, size: 18, color: Colors.blue),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Tooltip(
+                                          message: '${sub['installationTime'] ?? ''} - Técnico: ${sub['assignedTechName'] ?? 'N/A'}',
+                                          child: const Icon(LucideIcons.calendarCheck, size: 18, color: Colors.blue),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        IconButton(
+                                          icon: const Icon(LucideIcons.checkCircle2, size: 18, color: Colors.green),
+                                          tooltip: 'Confirmar Instalação Concluída',
+                                          onPressed: () => _confirmInstallation(context, ref, sub['id'], c['name'] ?? 'Cliente'),
+                                        ),
+                                      ],
                                     )
                                   else if (statusStr == 'AWAITING_SCHEDULE')
-                                    const Tooltip(
-                                      message: 'Aguardando cliente escolher horário',
-                                      child: Icon(LucideIcons.clock, size: 18, color: Colors.deepPurple),
+                                    Tooltip(
+                                      message: 'Aguardando cliente - Técnico: ${sub['assignedTechName'] ?? 'N/A'}',
+                                      child: const Icon(LucideIcons.clock, size: 18, color: Colors.deepPurple),
                                     )
                                   else ...[
                                     IconButton(icon: const Icon(LucideIcons.edit, size: 18), onPressed: () {}),
@@ -190,105 +201,194 @@ class CrmScreen extends ConsumerWidget {
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
     String selectedRange = '09h-12h';
     final ranges = ['09h-12h', '12h-15h', '15h-18h'];
+    Map<String, dynamic>? selectedTech;
 
     showDialog(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: Text('Propor Horários - $clientName'),
-          content: SizedBox(
-            width: 450,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Adicione os horários disponíveis para instalação. O cliente escolherá o melhor.', style: TextStyle(fontSize: 13)),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: InkWell(
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: ctx,
-                            initialDate: selectedDate,
-                            firstDate: DateTime.now(),
-                            lastDate: DateTime.now().add(const Duration(days: 60)),
-                          );
-                          if (picked != null) setState(() => selectedDate = picked);
-                        },
-                        child: InputDecorator(
-                          decoration: const InputDecoration(labelText: 'Data', border: OutlineInputBorder(), isDense: true),
-                          child: Text('${selectedDate.day.toString().padLeft(2,'0')}/${selectedDate.month.toString().padLeft(2,'0')}'),
+      builder: (ctx) {
+        // Load techs on dialog open
+        return FutureBuilder<List<dynamic>>(
+          future: ref.read(apiServiceProvider).getEmployees(),
+          builder: (ctx, snapshot) {
+            final techs = (snapshot.data ?? []).where((e) => e['role'] == 'TECH').toList();
+
+            return StatefulBuilder(
+              builder: (ctx, setState) => AlertDialog(
+                title: Text('Propor Horários - $clientName'),
+                content: SizedBox(
+                  width: 450,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('Adicione horários e selecione o técnico responsável.', style: TextStyle(fontSize: 13)),
+                      const SizedBox(height: 16),
+                      // Tech selector
+                      DropdownButtonFormField<String>(
+                        value: selectedTech?['id'],
+                        decoration: const InputDecoration(
+                          labelText: 'Técnico Responsável',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          prefixIcon: Icon(LucideIcons.hardHat),
                         ),
+                        items: techs.map<DropdownMenuItem<String>>((t) => DropdownMenuItem(
+                          value: t['id'] as String,
+                          child: Text(t['name'] ?? ''),
+                        )).toList(),
+                        onChanged: (v) {
+                          setState(() => selectedTech = techs.firstWhere((t) => t['id'] == v));
+                        },
+                        hint: techs.isEmpty
+                          ? const Text('Nenhum técnico cadastrado')
+                          : const Text('Selecione um técnico'),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: selectedRange,
-                        decoration: const InputDecoration(labelText: 'Intervalo', border: OutlineInputBorder(), isDense: true),
-                        items: ranges.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
-                        onChanged: (v) => setState(() => selectedRange = v!),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: ctx,
+                                  initialDate: selectedDate,
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(const Duration(days: 60)),
+                                );
+                                if (picked != null) setState(() => selectedDate = picked);
+                              },
+                              child: InputDecorator(
+                                decoration: const InputDecoration(labelText: 'Data', border: OutlineInputBorder(), isDense: true),
+                                child: Text('${selectedDate.day.toString().padLeft(2,'0')}/${selectedDate.month.toString().padLeft(2,'0')}'),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: selectedRange,
+                              decoration: const InputDecoration(labelText: 'Intervalo', border: OutlineInputBorder(), isDense: true),
+                              items: ranges.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+                              onChanged: (v) => setState(() => selectedRange = v!),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(LucideIcons.plusCircle, color: Colors.green),
+                            tooltip: 'Adicionar horário',
+                            onPressed: () {
+                              final label = '${selectedDate.day.toString().padLeft(2,'0')}/${selectedDate.month.toString().padLeft(2,'0')} $selectedRange';
+                              if (!slots.contains(label)) {
+                                setState(() => slots.add(label));
+                              }
+                            },
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(LucideIcons.plusCircle, color: Colors.green),
-                      tooltip: 'Adicionar horário',
-                      onPressed: () {
-                        final label = '${selectedDate.day.toString().padLeft(2,'0')}/${selectedDate.month.toString().padLeft(2,'0')} $selectedRange';
-                        if (!slots.contains(label)) {
-                          setState(() => slots.add(label));
-                        }
-                      },
-                    ),
-                  ],
+                      const SizedBox(height: 12),
+                      if (slots.isNotEmpty) ...[
+                        const Text('Horários propostos:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 6,
+                          children: slots.map((s) => Chip(
+                            label: Text(s, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            backgroundColor: Colors.green.shade50,
+                            deleteIcon: const Icon(Icons.close, size: 16),
+                            onDeleted: () => setState(() => slots.remove(s)),
+                          )).toList(),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                if (slots.isNotEmpty) ...[
-                  const Text('Horários propostos:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: slots.map((s) => Chip(
-                      label: Text(s, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                      backgroundColor: Colors.green.shade50,
-                      deleteIcon: const Icon(Icons.close, size: 16),
-                      onDeleted: () => setState(() => slots.remove(s)),
-                    )).toList(),
+                actions: [
+                  TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+                  ElevatedButton(
+                    onPressed: (slots.isEmpty || selectedTech == null) ? null : () async {
+                      Navigator.pop(ctx);
+                      try {
+                        await ref.read(apiServiceProvider).sendInstallationOptions(
+                          subscriptionId, slots,
+                          techId: selectedTech!['id'],
+                          techName: selectedTech!['name'],
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Opções enviadas ao cliente com sucesso!'), backgroundColor: Colors.green),
+                          );
+                        }
+                        ref.invalidate(crmProvider);
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+                          );
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                    child: const Text('Enviar Opções ao Cliente'),
                   ),
                 ],
-              ],
-            ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _confirmInstallation(BuildContext context, WidgetRef ref, String subscriptionId, String clientName) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Confirmar Instalação - $clientName'),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const ListTile(
+                leading: Icon(LucideIcons.checkCircle, color: Colors.green),
+                title: Text('Instalação Concluída', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
+                subtitle: Text('O técnico realizou a instalação com sucesso.'),
+              ),
+              const SizedBox(height: 8),
+              const ListTile(
+                leading: Icon(LucideIcons.wifi, color: Colors.blue),
+                title: Text('Provisionamento OLT', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text('A porta de fibra será liberada automaticamente.'),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
-            ElevatedButton(
-              onPressed: slots.isEmpty ? null : () async {
-                Navigator.pop(ctx);
-                try {
-                  await ref.read(apiServiceProvider).sendInstallationOptions(subscriptionId, slots);
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Opções enviadas ao cliente com sucesso!'), backgroundColor: Colors.green),
-                    );
-                  }
-                  ref.invalidate(crmProvider);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-              child: const Text('Enviar Opções ao Cliente'),
-            ),
-          ],
         ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ref.read(apiServiceProvider).updateSubscriptionStatus(subscriptionId, 'ACTIVE');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Plano Ativado com Sucesso! Fibra liberada na OLT.'), backgroundColor: Colors.green),
+                  );
+                }
+                ref.invalidate(crmProvider);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+            child: const Text('Ativar Plano'),
+          ),
+        ],
       ),
     );
   }

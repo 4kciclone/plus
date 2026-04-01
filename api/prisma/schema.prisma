@@ -55,7 +55,9 @@ model Subscription {
   startDate       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   
-  installationOptions String? // JSON array of proposed slots, e.g. ["09/04 09h-12h","09/04 12h-18h"]
+  installationOptions String? // JSON array of proposed slots
+  assignedTechId   String?  // Employee ID of assigned technician
+  assignedTechName String?  // Cached tech name for quick display
   wifiSsid        String?  @default("Familia_Plus_5G")
   wifiPassword    String?  @default("changeme123")
 

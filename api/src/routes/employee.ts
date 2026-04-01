@@ -36,6 +36,38 @@ router.post("/login", async (req: Request, res: Response) => {
 });
 
 
+// --- EMPLOYEE CRUD ---
+router.get("/employees", employeeAuthMiddleware(["ADMIN", "SUPPORT"]), async (req: EmployeeAuthRequest, res: Response) => {
+  const employees = await prisma.employee.findMany({
+    select: { id: true, name: true, email: true, role: true, createdAt: true },
+    orderBy: { name: "asc" }
+  });
+  res.json(employees);
+});
+
+router.post("/employees", employeeAuthMiddleware(["ADMIN"]), async (req: EmployeeAuthRequest, res: Response) => {
+  const { name, email, password, role } = req.body;
+  if (!name || !email || !password || !role) {
+    res.status(400).json({ error: "Campos obrigatórios: name, email, password, role" });
+    return;
+  }
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    const employee = await prisma.employee.create({
+      data: { name, email, password: hashed, role },
+      select: { id: true, name: true, email: true, role: true, createdAt: true }
+    });
+    res.status(201).json(employee);
+  } catch (err: any) {
+    if (err.code === 'P2002') {
+      res.status(409).json({ error: "Email já cadastrado." });
+    } else {
+      res.status(500).json({ error: "Erro ao cadastrar funcionário." });
+    }
+  }
+});
+
+
 // --- CRM MODULE ---
 router.get("/crm", employeeAuthMiddleware(["ADMIN", "SUPPORT", "FINANCE"]), async (req: EmployeeAuthRequest, res: Response) => {
   try {
@@ -75,12 +107,16 @@ router.put("/subscriptions/:id", employeeAuthMiddleware(["ADMIN", "SUPPORT", "TE
       data.installationOptions = typeof installationOptions === 'string' ? installationOptions : JSON.stringify(installationOptions);
       data.status = 'AWAITING_SCHEDULE';
     }
+    // Tech assignment
+    const { assignedTechId, assignedTechName } = req.body;
+    if (assignedTechId) data.assignedTechId = assignedTechId;
+    if (assignedTechName) data.assignedTechName = assignedTechName;
 
     const updated = await prisma.subscription.update({
       where: { id: id as string },
       data
     });
-    res.json({ success: true, subscription: updated, message: "Opções de instalação enviadas ao cliente." });
+    res.json({ success: true, subscription: updated, message: "Atualizado com sucesso." });
   } catch (err: any) {
     console.error("PUT /subscriptions/:id error:", err);
     res.status(500).json({ error: "Erro ao atualizar assinatura." });

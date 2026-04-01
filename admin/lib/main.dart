@@ -7,6 +7,7 @@ import 'theme_provider.dart';
 import 'screens/crm_screen.dart';
 import 'screens/tickets_screen.dart';
 import 'screens/finance_screen.dart';
+import 'screens/employees_screen.dart';
 import 'services/api_service.dart';
 
 void main() {
@@ -55,6 +56,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         case 1: return const CrmScreen();
         case 2: return const TicketsScreen();
         case 3: return const FinanceScreen();
+        case 4: return const EmployeesScreen();
         default: return const Center(child: Text('Página não encontrada'));
       }
     }
@@ -119,6 +121,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               NavigationRailDestination(icon: Icon(LucideIcons.users), label: Text('CRM')),
               NavigationRailDestination(icon: Icon(LucideIcons.layout), label: Text('Chamados')),
               NavigationRailDestination(icon: Icon(LucideIcons.wallet), label: Text('Financeiro')),
+              NavigationRailDestination(icon: Icon(LucideIcons.hardHat), label: Text('Equipe')),
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
