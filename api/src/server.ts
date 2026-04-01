@@ -89,7 +89,9 @@ app.get("/migrate-installation", async (_req, res) => {
     const { PrismaClient } = require('@prisma/client');
     const p = new PrismaClient();
     await p.$executeRawUnsafe(`ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "installationOptions" TEXT`);
-    res.json({ message: "Column installationOptions added successfully." });
+    await p.$executeRawUnsafe(`ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "assignedTechId" TEXT`);
+    await p.$executeRawUnsafe(`ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "assignedTechName" TEXT`);
+    res.json({ message: "Columns added successfully." });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
