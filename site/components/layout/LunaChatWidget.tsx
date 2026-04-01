@@ -57,27 +57,192 @@ export function LunaChatWidget() {
     });
     setInputValue("");
 
-    // Transactional State Machine (Mock)
+    // Transactional State Machine — Luna IA
     setTimeout(() => {
+      const lower = textToSend.toLowerCase();
+
+      // === Mudança de Plano ===
       if (textToSend === "Solicitar mudança de plano") {
         setMessages((prev) => [...prev, {
           id: (Date.now() + 1).toString(),
-          text: "Excelente! Notei que seu plano atual é de 500 MEGA. Deseja fazer um UPGRADE para nossa conexão premium de 1 GIGA (R$199,90/mês) ou deseja ver opções de downgrade?",
+          text: "Notei que seu plano atual é de 500 MEGA. Deseja fazer um UPGRADE para nossa conexão premium de 1 GIGA (R$199,90/mês) ou deseja ver opções de downgrade?",
           sender: "luna",
-          options: ["Quero fazer o Upgrade (1 GIGA)", "Ver todas as opções"]
+          options: ["Quero fazer o Upgrade (1 GIGA)", "Ver todas as opções", "Manter plano atual"]
         }]);
       } else if (textToSend === "Quero fazer o Upgrade (1 GIGA)") {
-         setMessages((prev) => [...prev, {
+        setMessages((prev) => [...prev, {
           id: (Date.now() + 1).toString(),
-          text: "Pronto! Upgrade realizado com sucesso no nosso sistema ERP. O novo perfil de 1 GIGA (+ Paramount e Max) já está provisionado no seu roteador. Mais alguma coisa?",
+          text: "Upgrade realizado com sucesso! O novo perfil de 1 GIGA (+ Paramount e Max) já está provisionado no seu roteador. A fatura foi reajustada automaticamente.",
           sender: "luna",
           widget: "upgrade_card"
         }]);
+      } else if (textToSend === "Ver todas as opções") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Aqui estão nossos planos disponíveis:\n\n⚡ 100 Mega — R$ 79,90/mês\n🚀 300 Mega — R$ 99,90/mês\n💎 500 Mega — R$ 149,90/mês (seu atual)\n🏆 1 Giga — R$ 199,90/mês\n\nQual desses te interessa?",
+          sender: "luna",
+          options: ["Quero fazer o Upgrade (1 GIGA)", "Manter plano atual"]
+        }]);
+      } else if (textToSend === "Manter plano atual") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Tudo certo! Seu plano continua o mesmo. Se precisar de algo mais, é só mandar! 😊",
+          sender: "luna",
+          options: ["Sem conexão com a internet", "Dúvida sobre fatura"]
+        }]);
+
+      // === Dúvida sobre fatura ===
+      } else if (textToSend === "Dúvida sobre fatura" || lower.includes("fatura") || lower.includes("boleto") || lower.includes("pix") || lower.includes("pagamento")) {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Consultei seu histórico financeiro 🔎\n\nSua última fatura foi de R$ 149,90 com vencimento em 10/04/2026.\n\n• Status: Pendente\n• Código Pix disponível na Área do Assinante\n\nO que mais posso ajudar?",
+          sender: "luna",
+          options: ["Acessar Área do Assinante", "Solicitar 2ª via", "Falar com financeiro"]
+        }]);
+      } else if (textToSend === "Solicitar 2ª via") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "A 2ª via da sua fatura foi enviada para o email cadastrado! Você também pode acessá-la na Área do Assinante, aba Faturas. O código Pix está disponível para pagamento imediato.",
+          sender: "luna",
+          options: ["Acessar Área do Assinante", "Outra dúvida"]
+        }]);
+      } else if (textToSend === "Falar com financeiro") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Vou transferir você para o setor financeiro! 📞\n\nEnquanto isso, você pode ligar diretamente para:\n📱 (24) 99999-0001 (WhatsApp)\n🕐 Horário: Seg-Sex, 8h às 18h\n\nOu acesse a Área do Assinante para gerar o Pix automaticamente.",
+          sender: "luna",
+          options: ["Acessar Área do Assinante", "Outra dúvida"]
+        }]);
+
+      // === Sem conexão ===
+      } else if (textToSend === "Sem conexão com a internet" || lower.includes("sem internet") || lower.includes("sem conexão") || lower.includes("não conecta")) {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Entendi! Vou fazer um diagnóstico rápido na sua conexão... 🔍",
+          sender: "luna"
+        }]);
+
+        setTimeout(() => {
+          setMessages((prev) => [...prev, {
+            id: (Date.now() + 2).toString(),
+            text: "✅ Diagnóstico concluído!\n\n• Sinal OLT: Normal (-18.5 dBm)\n• Status PPPoE: Ativo\n• Última queda registrada: Nenhuma\n\nSua conexão parece estável no nosso lado. Vamos tentar reiniciar o roteador remotamente?",
+            sender: "luna",
+            options: ["Reiniciar roteador", "Agendar visita técnica", "Já resolvi, obrigado!"]
+          }]);
+        }, 2000);
+
+      // === Internet lenta ===
+      } else if (textToSend === "Internet lenta" || lower.includes("lenta") || lower.includes("lento") || lower.includes("velocidade")) {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Executando teste de velocidade na sua porta... 📊",
+          sender: "luna"
+        }]);
+
+        setTimeout(() => {
+          setMessages((prev) => [...prev, {
+            id: (Date.now() + 2).toString(),
+            text: "📊 Resultado do teste:\n\n• Download: 487 Mbps\n• Upload: 248 Mbps\n• Latência: 4ms\n• Plano contratado: 500 Mega\n\nSua velocidade está dentro do esperado (97.4%)! Se o Wi-Fi está lento, pode ser interferência no canal. Quer que eu otimize o canal do seu roteador?",
+            sender: "luna",
+            options: ["Otimizar canal Wi-Fi", "Agendar visita técnica", "Está bom, obrigado!"]
+          }]);
+        }, 2500);
+
+      // === Queda intermitente ===
+      } else if (textToSend === "Queda intermitente" || lower.includes("queda") || lower.includes("cai") || lower.includes("instável")) {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Analisando o histórico de estabilidade da sua conexão... 🔄",
+          sender: "luna"
+        }]);
+
+        setTimeout(() => {
+          setMessages((prev) => [...prev, {
+            id: (Date.now() + 2).toString(),
+            text: "📋 Relatório de estabilidade (últimas 24h):\n\n• Reconexões PPPoE: 0\n• Perda de pacotes: 0.01%\n• Uptime do roteador: 14 dias\n• Alertas de rede na região: Nenhum\n\nSua rede está estável! As quedas podem ser no Wi-Fi. Quer que eu reinicie o roteador ou agende uma visita técnica?",
+            sender: "luna",
+            options: ["Reiniciar roteador", "Agendar visita técnica", "Trocar canal Wi-Fi"]
+          }]);
+        }, 2000);
+
+      // === Ações de resolução ===
+      } else if (textToSend === "Reiniciar roteador") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "🔄 Enviando comando de reinicialização ao seu roteador via TR-069...",
+          sender: "luna"
+        }]);
+
+        setTimeout(() => {
+          setMessages((prev) => [...prev, {
+            id: (Date.now() + 2).toString(),
+            text: "✅ Roteador reiniciado com sucesso! Aguarde 2 minutos para ele reconectar. Se o problema persistir, posso agendar uma visita técnica.",
+            sender: "luna",
+            options: ["Resolveu, obrigado!", "Agendar visita técnica"]
+          }]);
+        }, 3000);
+
+      } else if (textToSend === "Otimizar canal Wi-Fi" || textToSend === "Trocar canal Wi-Fi") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "📡 Analisando interferência nos canais...\n\nAlterando:\n• 2.4 GHz: Canal 1 → Canal 6\n• 5 GHz: Canal 36 → Canal 149\n\n✅ Pronto! Os novos canais têm menor interferência na sua região. Se usar a rede 5G (Familia_Plus_5G), reconecte agora.",
+          sender: "luna",
+          options: ["Resolveu, obrigado!", "Preciso de mais ajuda"]
+        }]);
+
+      } else if (textToSend === "Agendar visita técnica") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "📅 Posso abrir um chamado técnico para visita! Nosso suporte vai propor os horários disponíveis e você escolhe o melhor.\n\nVocê pode abrir o chamado diretamente pela Área do Assinante → aba Chamados → \"Abrir novo chamado\".",
+          sender: "luna",
+          options: ["Acessar Área do Assinante", "Outra dúvida"]
+        }]);
+
+      // === Navegação ===
+      } else if (textToSend === "Acessar Área do Assinante") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Te redirecionando para a Área do Assinante... 🚀",
+          sender: "luna"
+        }]);
+        setTimeout(() => { window.location.href = "/area-do-assinante"; }, 1500);
+
+      // === Encerramento ===
+      } else if (lower.includes("obrigado") || lower.includes("resolveu") || lower.includes("valeu") || textToSend === "Está bom, obrigado!" || textToSend === "Já resolvi, obrigado!" || textToSend === "Resolveu, obrigado!") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Fico feliz em ajudar! 💜 Se precisar de algo mais, é só chamar. A Plus Internet está sempre aqui pra você! ⚡",
+          sender: "luna"
+        }]);
+
+      // === Outra dúvida / Voltar ao menu ===
+      } else if (textToSend === "Outra dúvida" || textToSend === "Preciso de mais ajuda") {
+        setMessages((prev) => [...prev, {
+          id: (Date.now() + 1).toString(),
+          text: "Claro! Como posso ajudar? 😊",
+          sender: "luna",
+          options: [
+            "Sem conexão com a internet",
+            "Internet lenta",
+            "Queda intermitente",
+            "Solicitar mudança de plano",
+            "Dúvida sobre fatura"
+          ]
+        }]);
+
+      // === Fallback inteligente ===
       } else {
         setMessages((prev) => [...prev, {
           id: (Date.now() + 1).toString(),
-          text: "Estou realizando um diagnóstico no seu contrato agora mesmo usando nossa integração Mikrotik/OLT. Aguarde um instante...",
-          sender: "luna"
+          text: "Entendi sua solicitação! Vou te direcionar para as opções que posso ajudar agora. Escolha abaixo:",
+          sender: "luna",
+          options: [
+            "Sem conexão com a internet",
+            "Internet lenta",
+            "Dúvida sobre fatura",
+            "Solicitar mudança de plano",
+            "Agendar visita técnica"
+          ]
         }]);
       }
     }, 1000);
