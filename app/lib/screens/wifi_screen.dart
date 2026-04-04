@@ -249,7 +249,7 @@ class WifiScreen extends ConsumerWidget {
   void _showEditWifiDialog(BuildContext context, WidgetRef ref, String initialSsid, String initialPass) {
     showDialog(
       context: context,
-      barrierColor: Colors.blackDE.withOpacity(0.8), // Using DE suffix for transparent black
+      barrierColor: Colors.black87, // Using 87 suffix for transparent black
       builder: (context) => _EditWifiDialog(initialSsid: initialSsid, initialPass: initialPass),
     );
   }
@@ -359,7 +359,7 @@ class _EditWifiDialogState extends ConsumerState<_EditWifiDialog> {
           ),
         ),
       ),
-    ).animate().scale(duration: 300.ms, curve: Curves.backOut).fadeIn();
+    ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack).fadeIn();
   }
 
   Widget _buildModernInput({required TextEditingController controller, required String label, bool obscure = false}) {

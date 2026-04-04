@@ -7,6 +7,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:convert';
 import '../services/api_service.dart';
 import '../utils/app_styles.dart';
+import 'dart:ui';
 
 final ticketsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final res = await ref.read(apiProvider).get('/tickets/my');
@@ -30,12 +31,14 @@ class SupportScreen extends ConsumerWidget {
           // Radial glow behind Luna card
           Positioned(
             top: 20, left: -40,
-            child: Container(
-              width: 300, height: 300,
-              decoration: BoxDecoration(
-                color: AppStyles.primaryMagenta.withOpacity(0.1),
-                shape: BoxShape.circle,
-                filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
+              child: Container(
+                width: 300, height: 300,
+                decoration: BoxDecoration(
+                  color: AppStyles.primaryMagenta.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -261,5 +264,4 @@ class SupportScreen extends ConsumerWidget {
   }
 }
 
-// Support for blur
-import 'dart:ui';
+

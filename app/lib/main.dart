@@ -128,7 +128,7 @@ class PlusApp extends ConsumerWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 0,
           clipBehavior: Clip.antiAlias,
           shape: RoundedRectangleBorder(

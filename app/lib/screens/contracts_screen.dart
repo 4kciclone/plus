@@ -35,12 +35,14 @@ class ContractsScreen extends ConsumerWidget {
           // Background Glow
           Positioned(
             bottom: -50, left: -50,
-            child: Container(
-              width: 250, height: 250,
-              decoration: BoxDecoration(
-                color: AppStyles.primaryMagenta.withOpacity(0.05),
-                shape: BoxShape.circle,
-                filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              child: Container(
+                width: 250, height: 250,
+                decoration: BoxDecoration(
+                  color: AppStyles.primaryMagenta.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),

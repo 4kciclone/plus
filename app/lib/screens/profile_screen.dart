@@ -41,12 +41,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           // Subtly glow at the top
           Positioned(
             top: -100, left: MediaQuery.of(context).size.width / 2 - 150,
-            child: Container(
-              width: 300, height: 300,
-              decoration: BoxDecoration(
-                color: AppStyles.primaryMagenta.withOpacity(0.05),
-                shape: BoxShape.circle,
-                filter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 100, sigmaY: 100),
+              child: Container(
+                width: 300, height: 300,
+                decoration: BoxDecoration(
+                  color: AppStyles.primaryMagenta.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -76,7 +78,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             style: GoogleFonts.sora(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.white),
                           ),
                         ),
-                      ).animate().scale(duration: 500.ms, curve: Curves.backOut),
+                      ).animate().scale(duration: 500.ms, curve: Curves.easeOutBack),
                       const SizedBox(height: 24),
                       Text(
                         user?['name'] ?? 'Cliente Plus', 
@@ -272,7 +274,7 @@ class _ChangePasswordDialogState extends ConsumerState<_ChangePasswordDialog> {
           ),
         ),
       ),
-    ).animate().scale(duration: 300.ms, curve: Curves.backOut).fadeIn();
+    ).animate().scale(duration: 300.ms, curve: Curves.easeOutBack).fadeIn();
   }
 
   Widget _buildInput({required TextEditingController controller, required String label}) {

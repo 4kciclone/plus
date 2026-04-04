@@ -55,12 +55,14 @@ class ConnectionScreen extends ConsumerWidget {
           // Background Glow
           Positioned(
             top: 100, left: MediaQuery.of(context).size.width / 2 - 150,
-            child: Container(
-              width: 300, height: 300,
-              decoration: BoxDecoration(
-                color: AppStyles.primaryMagenta.withOpacity(0.05),
-                shape: BoxShape.circle,
-                filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              child: Container(
+                width: 300, height: 300,
+                decoration: BoxDecoration(
+                  color: AppStyles.primaryMagenta.withOpacity(0.05),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -199,7 +201,7 @@ class ConnectionScreen extends ConsumerWidget {
                 Text(
                   '$ping',
                   style: GoogleFonts.sora(fontSize: 64, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -2),
-                ).animate().scale(duration: 400.ms, curve: Curves.backOut),
+                ).animate().scale(duration: 400.ms, curve: Curves.easeOutBack),
                 Text(
                   'MS / PING', 
                   style: GoogleFonts.sora(color: Colors.white38, letterSpacing: 2, fontSize: 10, fontWeight: FontWeight.w900),

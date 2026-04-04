@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/animated_logo.dart';
 import '../utils/app_styles.dart';
+import 'dart:ui';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -30,8 +31,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authState = ref.watch(authStateProvider); // Check if this is the correct name
-    // Re-calculating authState properly as in original:
     final currentAuthState = ref.watch(authProvider);
 
     return Scaffold(
@@ -42,13 +41,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Positioned(
             bottom: -100,
             left: -100,
-            child: Container(
-              width: 300,
-              height: 300,
-              decoration: BoxDecoration(
-                color: AppStyles.primaryMagenta.withOpacity(0.1),
-                shape: BoxShape.circle,
-                filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+            child: ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              child: Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  color: AppStyles.primaryMagenta.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -214,6 +215,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-
-// Fixed import for blur
-import 'dart:ui';

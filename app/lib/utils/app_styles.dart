@@ -19,8 +19,8 @@ class AppStyles {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Colors.white10,
-      Colors.white05,
+      Color(0x1AFFFFFF), // Colors.white10
+      Color(0x0DFFFFFF), // Colors.white05
     ],
   );
 
@@ -51,6 +51,7 @@ class GlassCard extends StatelessWidget {
   final double? width;
   final double? height;
   final double radius;
+  final double opacity;
 
   const GlassCard({
     super.key,
@@ -59,6 +60,7 @@ class GlassCard extends StatelessWidget {
     this.width,
     this.height,
     this.radius = 24,
+    this.opacity = 0.05,
   });
 
   @override
@@ -69,7 +71,7 @@ class GlassCard extends StatelessWidget {
         width: width,
         height: height,
         padding: padding ?? const EdgeInsets.all(20),
-        decoration: AppStyles.glassDecoration(radius: radius),
+        decoration: AppStyles.glassDecoration(radius: radius, opacity: opacity),
         child: child,
       ),
     );

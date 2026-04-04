@@ -200,7 +200,7 @@ class InvoicesScreen extends ConsumerWidget {
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(
-              isPending ? LucideIcons.alertCircle : LucideIcons.check2, 
+              isPending ? LucideIcons.alertCircle : LucideIcons.checkCircle, 
               color: isPending ? AppStyles.primaryMagenta : Colors.green, 
               size: 24
             ),
