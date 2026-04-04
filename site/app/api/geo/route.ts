@@ -2,15 +2,16 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const res = await fetch("https://ipwho.is/", {
+    // ip-api.com works on HTTP for server-side (free tier allows HTTP)
+    const res = await fetch("http://ip-api.com/json/?fields=status,city,region,regionName", {
       headers: { "User-Agent": "PlusInternet/1.0" },
     });
     const data = await res.json();
 
-    if (data && data.success) {
+    if (data && data.status === "success" && data.city) {
       return NextResponse.json({
-        city: data.city || "",
-        region_code: data.region_code || "",
+        city: data.city,
+        region_code: data.region || "",
       });
     }
 
@@ -19,3 +20,4 @@ export async function GET() {
     return NextResponse.json({ city: "", region_code: "" }, { status: 500 });
   }
 }
+
