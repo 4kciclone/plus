@@ -39,10 +39,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       setStateCode(savedState);
     } else {
       // Auto-detect silently based on IP without prompting GPS permission immediately
-      fetch("https://ipwho.is/")
+      fetch("/api/geo")
         .then(res => res.json())
         .then(data => {
-          if (data && data.success && data.city && data.region_code) {
+          if (data && data.city && data.region_code) {
             setCity(data.city);
             setStateCode(data.region_code);
           }
@@ -84,10 +84,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         (error) => {
           // Fallback to IP geolocation silently
           console.warn("Geolocation warning:", error.message, "- Trying IP Fallback...");
-          fetch("https://ipwho.is/")
+          fetch("/api/geo")
             .then(res => res.json())
             .then(data => {
-              if (data && data.success && data.city && data.region_code) {
+              if (data && data.city && data.region_code) {
                 setCity(data.city);
                 setStateCode(data.region_code);
                 localStorage.setItem("plus-city", data.city);
