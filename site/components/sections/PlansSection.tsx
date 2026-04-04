@@ -9,10 +9,10 @@ import { motion } from "framer-motion";
 
 const staticPlans: Record<string, Array<{ name: string; price: string; speed: string; popular: boolean; features: string[] }>> = {
   Residencial: [
-    { name: "100 Mega", price: "79,90", speed: "100", popular: false, features: ["100% Fibra Óptica", "Download Ilimitado"] },
-    { name: "500 Mega", price: "109,90", speed: "500", popular: true, features: ["100% Fibra Óptica", "Ideal para Família"] },
-    { name: "800 Mega", price: "159,90", speed: "800", popular: false, features: ["100% Fibra Óptica", "Ideal para Games"] },
-    { name: "1 Giga", price: "199,90", speed: "1G", popular: false, features: ["100% Fibra Óptica", "Ultra Velocidade"] },
+    { name: "100 Mega", price: "99,90", speed: "100", popular: false, features: ["100% Fibra Óptica", "HBO Max, Disney+, Deezer", "Paramount+ Incluso"] },
+    { name: "500 Mega", price: "129,90", speed: "500", popular: true, features: ["100% Fibra Óptica", "HBO Max, Disney+, Deezer", "Paramount+ Incluso"] },
+    { name: "800 Mega", price: "159,90", speed: "800", popular: false, features: ["100% Fibra Óptica", "HBO Max, Disney+, Deezer", "Paramount+ Incluso"] },
+    { name: "Plus Giga", price: "199,90", speed: "1G", popular: false, features: ["100% Fibra Óptica", "HBO Max, Disney+, Deezer", "Paramount+ Incluso"] },
   ],
   Comercial: [
     { name: "100 Mega", price: "119,90", speed: "100", popular: false, features: ["100% Fibra Óptica", "Estabilidade Corporativa"] },
@@ -21,10 +21,10 @@ const staticPlans: Record<string, Array<{ name: string; price: string; speed: st
     { name: "50 Mega + IP Válido", price: "239,90", speed: "50", popular: false, features: ["IP Fixo Válido", "Rotas Dedicadas"] },
   ],
   Combo: [
-    { name: "100 Mega + Streaming", price: "99,90", speed: "100", popular: false, features: ["Paramount+", "3 meses de Deezer"] },
-    { name: "500 Mega + Paramount", price: "129,90", speed: "500", popular: true, features: ["Paramount+", "Deezer"] },
-    { name: "500 Mega + Max", price: "129,90", speed: "500", popular: false, features: ["Max Incluso", "100% Fibra Óptica"] },
-    { name: "1 Giga + Completo", price: "199,90", speed: "1G", popular: false, features: ["Paramount+", "Deezer", "Max", "Ultra Velocidade"] },
+    { name: "100 Mega + 4 Apps", price: "119,90", speed: "100", popular: false, features: ["Disney+, Max, Deezer", "Paramount+", "100% Fibra Óptica"] },
+    { name: "500 Mega + 4 Apps", price: "129,90", speed: "500", popular: true, features: ["Disney+, Max, Deezer", "Paramount+", "100% Fibra Óptica"] },
+    { name: "800 Mega + 4 Apps", price: "159,90", speed: "800", popular: false, features: ["Disney+, Max, Deezer", "Paramount+", "100% Fibra Óptica"] },
+    { name: "Plus Giga + 4 Apps", price: "199,90", speed: "1G", popular: false, features: ["Disney+, Max, Deezer", "Paramount+", "Ultra Velocidade"] },
   ],
   "Internet + TV": [
     { name: "TV + Streaming", price: "49,90", speed: "", popular: false, features: ["Plataforma de Canais", "Conteúdo On-Demand"] },
@@ -107,20 +107,23 @@ export function PlansSection() {
                       transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
                       className={`snap-center shrink-0 w-[290px] md:w-[320px] bg-white rounded-2xl overflow-hidden flex flex-col relative border shadow-sm ${plan.popular ? 'border-primary ring-1 ring-primary' : 'border-black/5'}`}
                     >
-                      <div className="px-6 pt-8 pb-4 bg-white relative">
-                         {plan.popular && (
-                            <div className="absolute top-0 inset-x-0 h-6 bg-primary flex items-center justify-center text-white text-[10px] font-bold uppercase tracking-widest">
-                              O Mais Assinado
-                            </div>
-                         )}
-                         <p className="text-black/50 font-bold mb-1 uppercase text-xs tracking-wider">Plus {category}</p>
-                         <h4 className="text-3xl font-extrabold text-neutral-900 leading-none">{plan.name}</h4>
-                         <div className="mt-8 mb-2 flex items-baseline">
-                           <span className="text-neutral-900 font-bold text-lg mr-1">R$</span>
-                           <span className="text-5xl font-extrabold text-neutral-900 tracking-tight leading-none">{plan.price.split(',')[0]}</span>
-                           <span className="text-neutral-900 font-bold text-xl">,{plan.price.split(',')[1]}</span>
-                         </div>
-                         <span className="text-neutral-500 text-[13px] font-medium block h-6">/mês pagando no débito</span>
+                      <div className="px-6 pt-10 pb-4 bg-white relative">
+                        {/* Magenta Header Bar (Brand Identity) */}
+                        <div className="absolute top-0 inset-x-0 h-3 bg-primary" />
+                        
+                        {plan.popular && (
+                          <div className="absolute top-3 inset-x-0 h-6 bg-[#B30078] flex items-center justify-center text-white text-[10px] font-bold uppercase tracking-widest">
+                             O Mais Assinado
+                          </div>
+                        )}
+                        <p className="text-black/50 font-bold mb-1 uppercase text-xs tracking-wider">Plus {category}</p>
+                        <h4 className="text-3xl font-extrabold text-neutral-900 leading-none">{plan.name}</h4>
+                        <div className="mt-8 mb-2 flex items-baseline">
+                          <span className="text-neutral-900 font-bold text-lg mr-1">R$</span>
+                          <span className="text-5xl font-extrabold text-neutral-900 tracking-tight leading-none">{plan.price.split(',')[0]}</span>
+                          <span className="text-neutral-900 font-bold text-xl">,{plan.price.split(',')[1]}</span>
+                        </div>
+                        <span className="text-neutral-500 text-[13px] font-medium block h-6">/mês pagando no débito</span>
                       </div>
 
                       <div className="px-6 py-4 flex-1 flex flex-col items-center">

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:ui';
 import '../services/api_service.dart';
+import '../utils/app_styles.dart';
 
 final speedtestProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final dio = ref.read(apiProvider);
@@ -40,143 +44,241 @@ class ConnectionScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final speedtestOpt = ref.watch(speedtestProvider);
-    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: AppStyles.darkBg,
       appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(LucideIcons.gauge, color: colors.primary),
-            const SizedBox(width: 8),
-            const Text('Diagnóstico de Rede'),
-          ],
-        ),
+        title: Text('Diagnóstico Ultra', style: GoogleFonts.sora(fontWeight: FontWeight.bold)),
       ),
-      body: speedtestOpt.when(
-        loading: () => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: colors.primary),
-              const SizedBox(height: 24),
-              Text('Analisando sinal em tempo real...', style: TextStyle(color: colors.primary, fontWeight: FontWeight.bold)),
-            ],
-          )
-        ),
-        error: (err, stack) => Center(child: Text('Falha ao medir a rede: $err', style: const TextStyle(color: Colors.red))),
-        data: (data) {
-           return Padding(
-             padding: const EdgeInsets.all(24.0),
-             child: Column(
-               children: [
-                 // Top indicator (Corporate Light Design)
-                 Center(
-                   child: Container(
-                     width: 240,
-                     height: 240,
-                     decoration: BoxDecoration(
-                       shape: BoxShape.circle,
-                       color: Colors.white,
-                       boxShadow: [
-                         BoxShadow(color: colors.primary.withOpacity(0.1), blurRadius: 40, offset: const Offset(0, 10)),
-                       ]
-                     ),
-                     child: Column(
-                       mainAxisAlignment: MainAxisAlignment.center,
+      body: Stack(
+        children: [
+          // Background Glow
+          Positioned(
+            top: 100, left: MediaQuery.of(context).size.width / 2 - 150,
+            child: Container(
+              width: 300, height: 300,
+              decoration: BoxDecoration(
+                color: AppStyles.primaryMagenta.withOpacity(0.05),
+                shape: BoxShape.circle,
+                filter: ImageFilter.blur(sigmaX: 80, sigmaY: 80),
+              ),
+            ),
+          ),
+
+          speedtestOpt.when(
+            loading: () => _buildLoadingState(),
+            error: (err, stack) => Center(child: Text('Falha na fibra: $err', style: const TextStyle(color: Colors.red))),
+            data: (data) {
+               return Padding(
+                 padding: const EdgeInsets.all(24.0),
+                 child: Column(
+                   children: [
+                     const SizedBox(height: 40),
+                     
+                     // Central Ping Gauge
+                     _buildPingGauge(data["ping"]),
+                     
+                     const SizedBox(height: 60),
+                     
+                     // Stats Grid
+                     Row(
                        children: [
-                         Icon(LucideIcons.wifi, size: 40, color: colors.primary),
-                         const SizedBox(height: 16),
-                         Text(
-                           '${data["ping"]} ms',
-                           style: TextStyle(fontSize: 48, fontWeight: FontWeight.w900, color: colors.onSurface),
+                         Expanded(
+                           child: _StatGlassCard(
+                              icon: LucideIcons.arrowDownCircle, 
+                              color: AppStyles.primaryMagenta, 
+                              title: 'DOWNLOAD', 
+                              value: '${data["downloadMbps"]}',
+                              unit: 'Mbps'
+                           ),
                          ),
-                         Text('LATÊNCIA (PING)', style: TextStyle(color: Colors.grey.shade600, letterSpacing: 1.5, fontSize: 12, fontWeight: FontWeight.bold)),
+                         const SizedBox(width: 16),
+                         Expanded(
+                           child: _StatGlassCard(
+                              icon: LucideIcons.arrowUpCircle, 
+                              color: const Color(0xFF00D1FF), 
+                              title: 'UPLOAD', 
+                              value: '${data["uploadMbps"]}',
+                              unit: 'Mbps'
+                           ),
+                         ),
                        ],
                      ),
-                   ),
-                 ),
-                 const SizedBox(height: 48),
-                 
-                 // Stats row
-                 Row(
-                   children: [
-                     Expanded(
-                       child: _StatCard(
-                          icon: LucideIcons.arrowDownCircle, 
-                          iconColor: colors.primary, 
-                          title: 'DOWNLOAD', 
-                          value: '${data["downloadMbps"]} Mbps'
+                     
+                     const Spacer(),
+                     
+                     // Action Button
+                     Container(
+                       width: double.infinity,
+                       height: 60,
+                       decoration: BoxDecoration(
+                         gradient: AppStyles.primaryGradient,
+                         borderRadius: BorderRadius.circular(16),
+                         boxShadow: [
+                           BoxShadow(color: AppStyles.primaryMagenta.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 5)),
+                         ],
                        ),
-                     ),
-                     const SizedBox(width: 16),
-                     Expanded(
-                       child: _StatCard(
-                          icon: LucideIcons.arrowUpCircle, 
-                          iconColor: colors.secondary, 
-                          title: 'UPLOAD', 
-                          value: '${data["uploadMbps"]} Mbps'
+                       child: ElevatedButton.icon(
+                         style: ElevatedButton.styleFrom(
+                           backgroundColor: Colors.transparent,
+                           shadowColor: Colors.transparent,
+                           foregroundColor: Colors.white,
+                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                         ),
+                         onPressed: () => ref.invalidate(speedtestProvider),
+                         icon: const Icon(LucideIcons.refreshCcw, size: 20),
+                         label: Text('TESTAR CONEXÃO', style: GoogleFonts.sora(fontWeight: FontWeight.w800, fontSize: 14)),
                        ),
-                     ),
+                     ).animate().fadeIn(delay: 600.ms),
+                     const SizedBox(height: 24),
                    ],
                  ),
-                 
-                 const Spacer(),
-                 
-                 SizedBox(
-                   width: double.infinity,
-                   height: 56,
-                   child: ElevatedButton.icon(
-                     style: ElevatedButton.styleFrom(
-                       backgroundColor: colors.primary,
-                       foregroundColor: Colors.white,
-                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                       elevation: 0,
-                     ),
-                     onPressed: () => ref.invalidate(speedtestProvider),
-                     icon: const Icon(LucideIcons.refreshCw, size: 20),
-                     label: const Text('Executar Novo Teste', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                   ),
-                 ),
-               ],
-             ),
-           );
-        },
+               );
+            },
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120, height: 120,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                CircularProgressIndicator(
+                  strokeWidth: 2, 
+                  color: AppStyles.primaryMagenta.withOpacity(0.2)
+                ),
+                const Icon(LucideIcons.zap, color: AppStyles.primaryMagenta, size: 40)
+                    .animate(onPlay: (c) => c.repeat())
+                    .shimmer(duration: 2.seconds)
+                    .scale(begin: const Offset(0.8, 0.8), end: const Offset(1.2, 1.2), curve: Curves.easeInOut),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          Text(
+            'Medindo canais óticos...', 
+            style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Detectando latência mínima', 
+            style: GoogleFonts.dmSans(color: Colors.white38, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPingGauge(int ping) {
+    return Column(
+      children: [
+        AppStyles.glassEffect(
+          radius: 120,
+          child: Container(
+            width: 240, height: 240,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withOpacity(0.03),
+              border: Border.all(color: AppStyles.primaryMagenta.withOpacity(0.1)),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(LucideIcons.activity, size: 28, color: AppStyles.primaryMagenta)
+                    .animate(onPlay: (c) => c.repeat())
+                    .fade(duration: 1.seconds),
+                const SizedBox(height: 12),
+                Text(
+                  '$ping',
+                  style: GoogleFonts.sora(fontSize: 64, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -2),
+                ).animate().scale(duration: 400.ms, curve: Curves.backOut),
+                Text(
+                  'MS / PING', 
+                  style: GoogleFonts.sora(color: Colors.white38, letterSpacing: 2, fontSize: 10, fontWeight: FontWeight.w900),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF00E676).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            'ESTÁVEL', 
+            style: GoogleFonts.sora(color: const Color(0xFF00E676), fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1),
+          ),
+        ).animate().fadeIn(delay: 300.ms),
+      ],
     );
   }
 }
 
-class _StatCard extends StatelessWidget {
+class _StatGlassCard extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
+  final Color color;
   final String title;
   final String value;
+  final String unit;
 
-  const _StatCard({required this.icon, required this.iconColor, required this.title, required this.value});
+  const _StatGlassCard({
+    required this.icon, 
+    required this.color, 
+    required this.title, 
+    required this.value,
+    required this.unit,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
-        ]
-      ),
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      radius: 24,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: iconColor, size: 28),
-          const SizedBox(height: 12),
-          Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
-          const SizedBox(height: 4),
-          Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 22, fontWeight: FontWeight.w900)),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            title, 
+            style: GoogleFonts.sora(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1),
+          ),
+          const SizedBox(height: 6),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value, 
+                style: GoogleFonts.sora(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                unit, 
+                style: GoogleFonts.dmSans(color: Colors.white24, fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
         ],
       ),
-    );
+    ).animate().fadeIn(delay: 400.ms).moveY(begin: 20, end: 0);
   }
 }

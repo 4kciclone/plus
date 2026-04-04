@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sora, DM_Sans } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
+import { LocationProvider } from "@/lib/location-context";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { LunaChatWidget } from "@/components/layout/LunaChatWidget";
 import "./globals.css";
@@ -43,11 +44,13 @@ export default function RootLayout({
       className={`${sora.variable} ${dmSans.variable} antialiased min-h-[100dvh]`}
     >
       <body className="min-h-[100dvh] flex flex-col font-sans bg-[#F4F5F7] text-neutral-900">
-        <AuthProvider>
-          {children}
-          <CookieConsent />
-          <LunaChatWidget />
-        </AuthProvider>
+        <LocationProvider>
+          <AuthProvider>
+            {children}
+            <CookieConsent />
+            <LunaChatWidget />
+          </AuthProvider>
+        </LocationProvider>
       </body>
     </html>
   );

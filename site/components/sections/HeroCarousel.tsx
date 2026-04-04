@@ -325,12 +325,12 @@ function Slide2() {
 
 function Slide3() {
   const combos = [
-    { title: "100 MEGA", features: "PARAMOUNT + 3 MESES DEEZER", price: "99" },
+    { title: "100 MEGA", features: "PARAMOUNT + 3 MESES DEEZER", price: "119" },
     { title: "500 MEGA", features: "DEEZER + PARAMOUNT", price: "129" },
-    { title: "500 MEGA", features: "MAX", price: "129" },
+    { title: "500 MEGA", features: "MAX", price: "149" },
     { title: "800 MEGA", features: "PARAMOUNT + DEEZER", price: "159" },
-    { title: "800 MEGA", features: "MAX", price: "159" },
-    { title: "1 GIGA", features: "DEEZER + PARAMOUNT + MAX", price: "199" },
+    { title: "800 MEGA", features: "MAX", price: "179" },
+    { title: "1 GIGA", features: "DEEZER + PARAMOUNT + MAX", price: "219" },
   ];
 
   return (

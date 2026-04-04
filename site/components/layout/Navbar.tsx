@@ -17,47 +17,14 @@ const STATE_MAP: Record<string, string> = {
   "sergipe": "SE", "tocantins": "TO",
 };
 
-function useGeolocation() {
-  const [location, setLocation] = useState("Valença / RJ");
-  const [loading, setLoading] = useState(false);
-
-  const requestLocation = () => {
-    if (!navigator.geolocation) return;
-    setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=pt-BR`,
-            { headers: { "User-Agent": "PlusInternet/1.0" } }
-          );
-          const data = await res.json();
-          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || "Sua região";
-          const stateName = (data.address?.state || "").toLowerCase();
-          const stateCode = data.address?.state_code?.toUpperCase() || STATE_MAP[stateName] || "";
-          setLocation(stateCode ? `${city} / ${stateCode}` : city);
-        } catch {
-          setLocation("Valença / RJ");
-        } finally {
-          setLoading(false);
-        }
-      },
-      () => {
-        setLoading(false);
-      },
-      { timeout: 8000 }
-    );
-  };
-
-  return { location, loading, requestLocation };
-}
+import { useLocation } from "@/lib/location-context";
+import { CitySelector } from "@/components/ui/CitySelector";
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const { location, loading: geoLoading, requestLocation } = useGeolocation();
+  const { city, stateCode, isValenca, loading: geoLoading, detectLocation } = useLocation();
 
   const [activeSegment, setActiveSegment] = useState("residencial");
 
@@ -104,18 +71,7 @@ export function Navbar() {
             Comercial
           </Link>
         </div>
-        <button
-          onClick={requestLocation}
-          className="flex items-center gap-2 hover:text-white cursor-pointer transition-colors"
-          title="Clique para detectar sua localização"
-        >
-          {geoLoading ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-          ) : (
-            <MapPin className="w-3.5 h-3.5" />
-          )}
-          <span>{location}</span>
-        </button>
+        <CitySelector />
       </div>
 
       <div className="bg-[#080b12]/95 backdrop-blur-md h-[80px] w-full flex items-center justify-between px-6 lg:px-12 relative">
@@ -180,11 +136,20 @@ export function Navbar() {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-[#0a0f18] border-t border-white/5 absolute top-full left-0 w-full h-[100vh] flex flex-col py-6 px-6 gap-6 overflow-y-auto">
           <button
-            onClick={requestLocation}
+            onClick={async () => {
+              await detectLocation();
+            }}
             className="flex items-center text-white/50 gap-2 font-bold text-xs uppercase tracking-widest border-b border-white/5 pb-4"
           >
             {geoLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <MapPin className="w-4 h-4" />}
-            <span>{location}</span>
+            <span className="flex items-center gap-2">
+              {city} / {stateCode}
+              {isValenca ? (
+                <span className="text-[8px] bg-green-500/10 text-green-500 px-1.5 py-0.5 rounded border border-green-500/20">Ativo</span>
+              ) : (
+                <span className="text-[8px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20">Em breve</span>
+              )}
+            </span>
           </button>
           
           <nav className="flex flex-col gap-5 text-lg font-bold text-white/90">

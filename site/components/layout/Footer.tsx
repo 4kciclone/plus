@@ -1,15 +1,18 @@
+"use client";
 import Link from "next/link";
-import { Wifi, MapPin, Phone, Mail, Share2 } from "lucide-react";
+import { Wifi, MapPin, Phone, Mail, Share2, CheckCircle2, AlertCircle } from "lucide-react";
 import { AnimatedLogo } from "@/components/ui/AnimatedLogo";
+import { useLocation } from "@/lib/location-context";
 
 export function Footer() {
+  const { city, isValenca } = useLocation();
   return (
     <footer className="bg-[#04080e] border-t border-white/5 pt-20 pb-10">
       <div className="container mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           <div className="space-y-6">
-            <Link href="/" className="flex items-center gap-3">
-              <AnimatedLogo />
+            <Link href="/" className="flex items-center gap-3 scale-90 origin-left">
+              <AnimatedLogo compact />
             </Link>
             <p className="text-white/50 text-sm leading-relaxed max-w-xs">
               Internet de verdade. Velocidade que você sente. Conectando pessoas e negócios com tecnologia de fibra óptica.
@@ -45,6 +48,35 @@ export function Footer() {
               <li><Link href="/teste-velocidade" className="text-white/50 hover:text-primary hover:translate-x-1 block transition-all text-sm">Teste de Velocidade</Link></li>
               <li><Link href="/politica-de-privacidade" className="text-white/50 hover:text-primary hover:translate-x-1 block transition-all text-sm">Privacidade</Link></li>
             </ul>
+          </div>
+
+          <div>
+            <h4 className="font-heading font-semibold text-lg text-white mb-6">Sua Região</h4>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                <MapPin className={`w-5 h-5 ${isValenca ? "text-primary" : "text-amber-400"}`} />
+                <span className="text-white font-bold">{city}</span>
+              </div>
+              
+              {isValenca ? (
+                <div className="flex items-start gap-3 text-xs text-green-400 font-medium leading-relaxed bg-green-500/5 p-3 rounded-xl border border-green-500/10">
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  Você está em uma área de cobertura 100% Fibra Óptica!
+                </div>
+              ) : (
+                <div className="flex items-start gap-3 text-xs text-amber-300 font-medium leading-relaxed bg-amber-500/5 p-3 rounded-xl border border-amber-500/10">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  Ainda não atendemos em {city}, mas estamos expandindo nossas redes.
+                </div>
+              )}
+              
+              <Link 
+                href="/cobertura" 
+                className="block text-[11px] font-black uppercase tracking-widest text-primary hover:text-white transition-colors"
+              >
+                Ver mapa completo →
+              </Link>
+            </div>
           </div>
 
           <div>

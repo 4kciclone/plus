@@ -8,10 +8,11 @@ export function StreamingSection() {
             <h2 className="text-3xl font-heading font-extrabold text-white mt-2 mb-4">Seus streamings favoritos já inclusos</h2>
             <p className="text-white/60 font-medium text-lg">Assinando os Combos de Fibra e TV da Plus, você leva conteúdo de ponta sem surpresas na fatura!</p>
           </div>
-          <div className="flex flex-wrap justify-center md:justify-end gap-10 opacity-70 grayscale hover:grayscale-0 transition-all duration-500 w-full md:w-auto">
-            <div className="text-white font-extrabold text-2xl tracking-widest uppercase">MAX</div>
-            <div className="text-white font-extrabold text-2xl tracking-widest uppercase">DEEZER</div>
-            <div className="text-white font-extrabold text-2xl tracking-widest uppercase">PARAMOUNT+</div>
+          <div className="flex flex-wrap justify-center md:justify-end gap-8 w-full md:w-auto">
+            <div className="text-[#00CCFF] font-black text-2xl tracking-tighter italic">DISNEY+</div>
+            <div className="text-white font-black text-2xl tracking-tighter italic">MAX</div>
+            <div className="text-[#E10098] font-black text-2xl tracking-tighter italic">DEEZER</div>
+            <div className="text-white font-black text-2xl tracking-tighter italic border-b-2 border-primary">PARAMOUNT+</div>
           </div>
         </div>
       </div>

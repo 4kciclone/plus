@@ -2,6 +2,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:ui';
+import '../utils/app_styles.dart';
 
 class RadarScreen extends ConsumerStatefulWidget {
   const RadarScreen({super.key});
@@ -28,106 +32,169 @@ class _RadarScreenState extends ConsumerState<RadarScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Immersive AR feel
+      backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: const BackButton(color: Colors.white),
-        title: const Text('Radar de Sinal Wi-Fi (AR)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+        title: Text(
+          'Radar de Sinal Ultra', 
+          style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16),
+        ),
         centerTitle: true,
       ),
       body: Stack(
         children: [
-          // Simulated AR Camera Background (Static dark blurred texture for now)
+          // Background Deep Blue/Black Gradient
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: RadialGradient(
                 colors: [
-                  const Color(0xFF0F172A).withOpacity(0.8),
+                  Color(0xFF1E1B4B),
                   Colors.black,
                 ],
-                radius: 1.5,
+                radius: 1.2,
+                center: Alignment.center,
               ),
             ),
           ),
           
-          // Radar Animation
+          // Scanning Grid Background
+          _buildBackgroundGrid(),
+
+          // Main Radar Component
           Center(
             child: AnimatedBuilder(
               animation: _sweepController,
               builder: (context, child) {
                 return CustomPaint(
-                  size: const Size(320, 320),
-                  painter: RadarPainter(_sweepController.value),
+                  size: const Size(340, 340),
+                  painter: UltraRadarPainter(_sweepController.value),
                 );
               },
             ),
-          ),
+          ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 3.seconds, color: Colors.white10),
 
-          // AR Overlay UI Elements
+          // Scanning UI Elements
           Positioned(
-            bottom: 40,
-            left: 24,
-            right: 24,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.2)),
-                boxShadow: [
-                  BoxShadow(color: Colors.greenAccent.withOpacity(0.1), blurRadius: 30)
-                ]
-              ),
-              child: const Column(
+            top: 140,
+            left: 0, right: 0,
+            child: Center(
+              child: Column(
                 children: [
-                   Row(
-                     children: [
-                       Icon(LucideIcons.waves, color: Colors.greenAccent, size: 24),
-                       SizedBox(width: 12),
-                       Text('Analisando Ambiente', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                     ],
-                   ),
-                   SizedBox(height: 12),
                    Text(
-                     'Caminhe pelo cômodo. O radar mapeia o sinal 5GHz do roteador nas paredes para identificar pontos cegos.',
-                     style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.5),
+                     'SCANNING...', 
+                     style: GoogleFonts.sora(
+                       color: AppStyles.primaryMagenta, 
+                       letterSpacing: 4, 
+                       fontSize: 10, 
+                       fontWeight: FontWeight.w900,
+                     ),
+                   ).animate(onPlay: (c) => c.repeat()).fadeIn(duration: 500.ms).fadeOut(delay: 500.ms),
+                   const SizedBox(height: 4),
+                   Text(
+                     'MAPA DE CALOR 5GHz ATIVO', 
+                     style: GoogleFonts.sora(color: Colors.white38, fontSize: 8, fontWeight: FontWeight.bold),
                    ),
                 ],
               ),
             ),
-          )
+          ),
+
+          // Bottom Instruction Panel
+          Positioned(
+            bottom: 40,
+            left: 24,
+            right: 24,
+            child: GlassCard(
+              padding: const EdgeInsets.all(28),
+              child: Column(
+                children: [
+                   Row(
+                     children: [
+                       Container(
+                         padding: const EdgeInsets.all(10),
+                         decoration: BoxDecoration(
+                           color: AppStyles.primaryMagenta.withOpacity(0.1),
+                           borderRadius: BorderRadius.circular(12),
+                         ),
+                         child: const Icon(LucideIcons.scanFace, color: AppStyles.primaryMagenta, size: 24),
+                       ),
+                       const SizedBox(width: 16),
+                       Expanded(
+                         child: Column(
+                           crossAxisAlignment: CrossAxisAlignment.start,
+                           children: [
+                             Text(
+                               'Calibração de Ambiente', 
+                               style: GoogleFonts.sora(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+                             ),
+                             const SizedBox(height: 2),
+                             Text(
+                               'Identificando obstáculos e reflexos.', 
+                               style: GoogleFonts.dmSans(color: Colors.white54, fontSize: 12),
+                             ),
+                           ],
+                         ),
+                       ),
+                     ],
+                   ),
+                   const SizedBox(height: 20),
+                   ClipRRect(
+                     borderRadius: BorderRadius.circular(10),
+                     child: LinearProgressIndicator(
+                       valueColor: const AlwaysStoppedAnimation<Color>(AppStyles.primaryMagenta),
+                       backgroundColor: Colors.white.withOpacity(0.05),
+                       minHeight: 4,
+                     ),
+                   ).animate(onPlay: (c) => c.repeat()).shimmer(duration: 2.seconds),
+                ],
+              ),
+            ),
+          ).animate().fadeIn(delay: 500.ms).moveY(begin: 30, end: 0),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBackgroundGrid() {
+    return Positioned.fill(
+      child: Opacity(
+        opacity: 0.1,
+        child: CustomPaint(
+          painter: GridPainter(),
+        ),
       ),
     );
   }
 }
 
-class RadarPainter extends CustomPainter {
-  final double sweepProgress; // 0.0 to 1.0
-  RadarPainter(this.sweepProgress);
+class UltraRadarPainter extends CustomPainter {
+  final double sweepProgress;
+  UltraRadarPainter(this.sweepProgress);
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
 
-    // Draw concentric grids
-    final gridPaint = Paint()
-      ..color = Colors.greenAccent.withOpacity(0.15)
+    // Rings
+    final ringPaint = Paint()
+      ..color = Colors.white.withOpacity(0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    canvas.drawCircle(center, radius * 0.33, gridPaint);
-    canvas.drawCircle(center, radius * 0.66, gridPaint);
-    canvas.drawCircle(center, radius, gridPaint);
+    canvas.drawCircle(center, radius * 0.25, ringPaint);
+    canvas.drawCircle(center, radius * 0.50, ringPaint);
+    canvas.drawCircle(center, radius * 0.75, ringPaint);
+    canvas.drawCircle(center, radius, ringPaint);
 
-    // Draw crosshairs
-    canvas.drawLine(Offset(center.dx, 0), Offset(center.dx, size.height), gridPaint);
-    canvas.drawLine(Offset(0, center.dy), Offset(size.width, center.dy), gridPaint);
+    // Crosshairs
+    canvas.drawLine(Offset(center.dx, 0), Offset(center.dx, size.height), ringPaint);
+    canvas.drawLine(Offset(0, center.dy), Offset(size.width, center.dy), ringPaint);
 
-    // Draw the sweeping gradient arc
+    // Sweep Line (Neon Magenta)
     final sweepAngle = sweepProgress * 2 * math.pi;
     final arcRect = Rect.fromCircle(center: center, radius: radius);
     
@@ -135,42 +202,69 @@ class RadarPainter extends CustomPainter {
       ..shader = SweepGradient(
         center: Alignment.center,
         startAngle: 0.0,
-        endAngle: math.pi / 2, // The tail length
+        endAngle: math.pi / 1.5,
         colors: [
           Colors.transparent,
-          Colors.greenAccent.withOpacity(0.1),
-          Colors.greenAccent.withOpacity(0.6),
+          AppStyles.primaryMagenta.withOpacity(0.05),
+          AppStyles.primaryMagenta.withOpacity(0.6),
         ],
-        stops: const [0.0, 0.5, 1.0],
-        transform: GradientRotation(sweepAngle - math.pi / 2),
+        stops: const [0.0, 0.4, 1.0],
+        transform: GradientRotation(sweepAngle - math.pi / 1.5),
       ).createShader(arcRect)
       ..style = PaintingStyle.fill;
 
-    canvas.drawArc(arcRect, sweepAngle - math.pi / 2, math.pi / 2, true, sweepPaint);
+    canvas.drawArc(arcRect, sweepAngle - math.pi / 1.5, math.pi / 1.5, true, sweepPaint);
 
-    // Draw static Signal Dots representing devices or signal hotspots
-    _drawSignalDot(canvas, center, Offset(center.dx + 40, center.dy - 60), Colors.greenAccent, 'TV');
-    _drawSignalDot(canvas, center, Offset(center.dx - 80, center.dy + 30), Colors.yellowAccent, 'Fraco');
-    _drawSignalDot(canvas, center, Offset(center.dx + 90, center.dy + 80), Colors.greenAccent, 'Excelente');
+    // Outer glow ring
+    final glowPaint = Paint()
+      ..color = AppStyles.primaryMagenta.withOpacity(0.2)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    canvas.drawCircle(center, radius, glowPaint);
+
+    // Simulated Signal Points
+    _drawSignalNode(canvas, center, Offset(center.dx + 50, center.dy - 90), AppStyles.primaryMagenta, 'PAREDE_OESTE', 0.85);
+    _drawSignalNode(canvas, center, Offset(center.dx - 100, center.dy + 40), const Color(0xFF00D1FF), 'DISPOSITIVO_IOT', 0.92);
+    _drawSignalNode(canvas, center, Offset(center.dx + 80, center.dy + 70), Colors.white30, 'REFLEXO_SIMULADO', 0.45);
   }
 
-  void _drawSignalDot(Canvas canvas, Offset center, Offset pos, Color color, String label) {
-    // Distance from sweep line (simulated glow effect when the sweep passes over it)
-    final dotPaint = Paint()..color = color..style = PaintingStyle.fill;
-    final glowPaint = Paint()..color = color.withOpacity(0.4)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+  void _drawSignalNode(Canvas canvas, Offset center, Offset pos, Color color, String tag, double strength) {
+    final nodePaint = Paint()..color = color..style = PaintingStyle.fill;
+    final haloPaint = Paint()..color = color.withOpacity(0.2)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
 
-    canvas.drawCircle(pos, 8, glowPaint);
-    canvas.drawCircle(pos, 4, dotPaint);
+    canvas.drawCircle(pos, 10 * strength, haloPaint);
+    canvas.drawCircle(pos, 4, nodePaint);
 
-    // Text Label simulating 3D AR tag
     final textPainter = TextPainter(
-      text: TextSpan(text: label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.bold)),
+      text: TextSpan(
+        text: tag, 
+        style: GoogleFonts.dmSans(color: color, fontSize: 8, fontWeight: FontWeight.w900, letterSpacing: 0.5)
+      ),
       textDirection: TextDirection.ltr,
     );
     textPainter.layout();
-    textPainter.paint(canvas, Offset(pos.dx + 12, pos.dy - 6));
+    textPainter.paint(canvas, Offset(pos.dx + 12, pos.dy - 4));
   }
 
   @override
-  bool shouldRepaint(covariant RadarPainter oldDelegate) => true;
+  bool shouldRepaint(covariant UltraRadarPainter oldDelegate) => true;
+}
+
+class GridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = Colors.white24..strokeWidth = 0.5;
+    const step = 40.0;
+    
+    for (double i = 0; i < size.width; i += step) {
+      canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
+    }
+    for (double i = 0; i < size.height; i += step) {
+      canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

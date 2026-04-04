@@ -98,31 +98,44 @@ class PlusApp extends ConsumerWidget {
 
     return MaterialApp.router(
       title: 'Plus App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF5F7FA), // Light Gray/Blueish Background
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF080B12),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF660099), // Vivo Purple
-          brightness: Brightness.light,
-          primary: const Color(0xFF660099),
-          secondary: const Color(0xFFFF0080), // Vibrant Pink Accent
-          surface: Colors.white,
-          onSurface: const Color(0xFF1E293B), // Dark text for cards
+          seedColor: const Color(0xFFE10098),
+          brightness: Brightness.dark,
+          primary: const Color(0xFFE10098),
+          secondary: const Color(0xFFAD0075),
+          surface: const Color(0xFF121721),
+          onSurface: Colors.white,
+          background: const Color(0xFF080B12),
         ),
-        textTheme: GoogleFonts.interTextTheme(
-          ThemeData.light().textTheme,
-        ).apply(bodyColor: const Color(0xFF1E293B), displayColor: const Color(0xFF0F172A)),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
+        textTheme: GoogleFonts.soraTextTheme(ThemeData.dark().textTheme).copyWith(
+          bodyLarge: GoogleFonts.dmSans(textStyle: ThemeData.dark().textTheme.bodyLarge),
+          bodyMedium: GoogleFonts.dmSans(textStyle: ThemeData.dark().textTheme.bodyMedium),
+          bodySmall: GoogleFonts.dmSans(textStyle: ThemeData.dark().textTheme.bodySmall),
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: const Color(0xFF080B12).withOpacity(0.8),
           elevation: 0,
           centerTitle: true,
-          iconTheme: IconThemeData(color: Color(0xFF660099)),
-          titleTextStyle: TextStyle(color: Color(0xFF1E293B), fontSize: 18, fontWeight: FontWeight.bold),
+          iconTheme: const IconThemeData(color: Colors.white),
+          titleTextStyle: GoogleFonts.sora(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        cardTheme: CardThemeData(
+        cardTheme: CardTheme(
           elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20), side: BorderSide(color: Colors.grey.withOpacity(0.1))),
-          color: Colors.white,
+          clipBehavior: Clip.antiAlias,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+            side: BorderSide(color: Colors.white.withOpacity(0.08)),
+          ),
+          color: const Color(0xFF121721).withOpacity(0.6),
         ),
       ),
       routerConfig: router,

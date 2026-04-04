@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:convert';
 import '../services/api_service.dart';
+import '../utils/app_styles.dart';
 
 final ticketsProvider = FutureProvider.autoDispose<List<dynamic>>((ref) async {
   final res = await ref.read(apiProvider).get('/tickets/my');
@@ -16,131 +19,235 @@ class SupportScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ticketsOpt = ref.watch(ticketsProvider);
-    final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
+      backgroundColor: AppStyles.darkBg,
       appBar: AppBar(
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Hero(tag: 'hero-Suporte', child: Icon(LucideIcons.headphones, color: colors.primary)),
-            const SizedBox(width: 12),
-            const Text('Suporte Técnico', style: TextStyle(fontWeight: FontWeight.bold)),
-          ],
-        ),
+        title: Text('Suporte Técnico', style: GoogleFonts.sora(fontWeight: FontWeight.bold)),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Luna AI Banner
-            Container(
-              padding: const EdgeInsets.all(24),
+      body: Stack(
+        children: [
+          // Radial glow behind Luna card
+          Positioned(
+            top: 20, left: -40,
+            child: Container(
+              width: 300, height: 300,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [colors.primary, const Color(0xFFC5007E)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              child: Column(
-                children: [
-                   const CircleAvatar(
-                     radius: 30,
-                     backgroundColor: Colors.white,
-                     child: Text('🤖', style: TextStyle(fontSize: 30)),
-                   ),
-                   const SizedBox(height: 16),
-                   const Text('Falar com a Luna', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w900)),
-                   const SizedBox(height: 8),
-                   Text('Diagnóstico de rede instantâneo com Inteligência Artificial.', textAlign: TextAlign.center, style: TextStyle(color: Colors.white.withOpacity(0.9))),
-                   const SizedBox(height: 20),
-                   ElevatedButton.icon(
-                     onPressed: () => context.push('/luna_chat'),
-                     icon: const Icon(LucideIcons.messageCircle, color: Color(0xFFFF0080)),
-                     label: const Text('Iniciar Chat', style: TextStyle(color: Color(0xFFFF0080), fontWeight: FontWeight.bold)),
-                     style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-                   )
-                ],
+                color: AppStyles.primaryMagenta.withOpacity(0.1),
+                shape: BoxShape.circle,
+                filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
               ),
             ),
-            
-            const SizedBox(height: 32),
-            const Text('Meus Chamados', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            
-            Expanded(
-              child: ticketsOpt.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => Center(child: Text('Erro: $err')),
-                data: (tickets) {
-                  if (tickets.isEmpty) return const Center(child: Text('Nenhum chamado aberto.'));
-                  return ListView.separated(
-                    itemCount: tickets.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final t = tickets[index];
-                      return Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white, 
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.grey.shade200),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4))],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(child: Text(t['subject'], style: TextStyle(color: colors.onSurface, fontWeight: FontWeight.w900, fontSize: 16))),
-                                _StatusBadge(status: t['status']),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(t['message'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(color: Colors.grey.shade600)),
-                            
-                            if (t['status'] == 'WAITING_USER' && t['visitOptions'] != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 16),
-                                child: Container(
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(color: Colors.orange.withOpacity(0.1), borderRadius: BorderRadius.circular(16)),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('Agendar Visita Técnica:', style: TextStyle(color: Colors.orangeAccent, fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 12),
-                                      Wrap(
-                                        spacing: 8, runSpacing: 8,
-                                        children: _parseOptions(t['visitOptions']).map<Widget>((opt) {
-                                          return ActionChip(
-                                            label: Text(opt, style: const TextStyle(fontSize: 12)),
-                                            backgroundColor: Colors.transparent,
-                                            side: const BorderSide(color: Colors.orangeAccent),
-                                            onPressed: () {
-                                              // TODO: send PUT /tickets/:id/visit
-                                            },
-                                          );
-                                        }).toList(),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Luna AI Premium Banner
+                _buildLunaHero(context),
+                
+                const SizedBox(height: 48),
+                
+                Text(
+                  'CHAMADOS EM ABERTO', 
+                  style: GoogleFonts.sora(fontSize: 11, fontWeight: FontWeight.w900, color: Colors.white38, letterSpacing: 1.5),
+                ),
+                const SizedBox(height: 16),
+                
+                Expanded(
+                  child: ticketsOpt.when(
+                    loading: () => const Center(child: CircularProgressIndicator(color: AppStyles.primaryMagenta)),
+                    error: (err, stack) => Center(child: Text('Erro: $err', style: const TextStyle(color: Colors.red))),
+                    data: (tickets) {
+                      if (tickets.isEmpty) return _buildEmptyState();
+                      return ListView.separated(
+                        itemCount: tickets.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          final t = tickets[index];
+                          return _buildTicketCard(context, ref, t);
+                        },
                       );
                     },
-                  );
-                },
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLunaHero(BuildContext context) {
+    return GlassCard(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        children: [
+           Container(
+             padding: const EdgeInsets.all(16),
+             decoration: BoxDecoration(
+               shape: BoxShape.circle,
+               color: Colors.white.withOpacity(0.05),
+               border: Border.all(color: AppStyles.primaryMagenta.withOpacity(0.3)),
+               boxShadow: [
+                 BoxShadow(color: AppStyles.primaryMagenta.withOpacity(0.2), blurRadius: 20),
+               ],
+             ),
+             child: const Icon(LucideIcons.sparkles, size: 40, color: AppStyles.primaryMagenta)
+                 .animate(onPlay: (c) => c.repeat())
+                 .shimmer(duration: 2.seconds, color: Colors.white)
+                 .shake(hz: 2, curve: Curves.easeInOut),
+           ),
+           const SizedBox(height: 24),
+           Text(
+             'Ajudante Virtual Luna', 
+             style: GoogleFonts.sora(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900),
+           ),
+           const SizedBox(height: 8),
+           Text(
+             'Diagnóstico de rede via IA e suporte em tempo real.', 
+             textAlign: TextAlign.center, 
+             style: GoogleFonts.dmSans(color: Colors.white54, fontSize: 13),
+           ),
+           const SizedBox(height: 32),
+           Container(
+             height: 54,
+             width: double.infinity,
+             decoration: BoxDecoration(
+               gradient: AppStyles.primaryGradient,
+               borderRadius: BorderRadius.circular(16),
+               boxShadow: [
+                 BoxShadow(color: AppStyles.primaryMagenta.withOpacity(0.2), blurRadius: 10, offset: const Offset(0, 4)),
+               ],
+             ),
+             child: ElevatedButton.icon(
+               onPressed: () => context.push('/luna_chat'),
+               icon: const Icon(LucideIcons.messageSquare, size: 18),
+               label: Text('INICIAR CHAT ULTRA', style: GoogleFonts.sora(fontWeight: FontWeight.w800, fontSize: 13)),
+               style: ElevatedButton.styleFrom(
+                 backgroundColor: Colors.transparent,
+                 shadowColor: Colors.transparent,
+                 foregroundColor: Colors.white,
+                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+               ),
+             ),
+           ),
+        ],
+      ),
+    ).animate().fadeIn().scale(begin: const Offset(0.95, 0.95));
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Text(
+        'Nenhum chamado registrado.', 
+        style: GoogleFonts.dmSans(color: Colors.white24, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+
+  Widget _buildTicketCard(BuildContext context, WidgetRef ref, Map<String, dynamic> t) {
+    return GlassCard(
+      padding: const EdgeInsets.all(24),
+      radius: 24,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  t['subject'], 
+                  style: GoogleFonts.sora(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16),
+                ),
               ),
-            )
-          ],
-        ),
+              _buildStatusBadge(t['status']),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            t['message'], 
+            maxLines: 2, 
+            overflow: TextOverflow.ellipsis, 
+            style: GoogleFonts.dmSans(color: Colors.white54, fontSize: 13, height: 1.5),
+          ),
+          
+          if (t['status'] == 'WAITING_USER' && t['visitOptions'] != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 24),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.02), 
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(LucideIcons.calendar, color: Color(0xFFFFAB40), size: 16),
+                        const SizedBox(width: 8),
+                        Text(
+                          'AGENDAR VISITA TÉCNICA', 
+                          style: GoogleFonts.sora(color: const Color(0xFFFFAB40), fontWeight: FontWeight.w900, fontSize: 10, letterSpacing: 1),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 10, runSpacing: 10,
+                      children: _parseOptions(t['visitOptions']).map<Widget>((opt) {
+                        return GestureDetector(
+                          onTap: () {
+                            // Logic for scheduling
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.white.withOpacity(0.1)),
+                            ),
+                            child: Text(
+                              opt, 
+                              style: GoogleFonts.dmSans(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ).animate().fadeIn(delay: 200.ms),
+        ],
+      ),
+    ).animate().fadeIn().moveX(begin: -10, end: 0);
+  }
+
+  Widget _buildStatusBadge(String status) {
+    Color color = AppStyles.primaryMagenta;
+    String label = status;
+
+    if (status == 'WAITING_USER') { color = const Color(0xFFFFAB40); label = 'ATENÇÃO'; }
+    if (status == 'SCHEDULED') { color = const Color(0xFF00E676); label = 'AGENDADO'; }
+    if (status == 'RESOLVED') { color = Colors.white24; label = 'CONCLUÍDO'; }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1), 
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.2)),
+      ),
+      child: Text(
+        label, 
+        style: GoogleFonts.sora(color: color, fontSize: 9, fontWeight: FontWeight.w900, letterSpacing: 1),
       ),
     );
   }
@@ -154,24 +261,5 @@ class SupportScreen extends ConsumerWidget {
   }
 }
 
-class _StatusBadge extends StatelessWidget {
-  final String status;
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    Color bg = Colors.blue.withOpacity(0.1);
-    Color fg = Colors.blue.shade700;
-    String label = status;
-
-    if (status == 'WAITING_USER') { bg = Colors.orange.withOpacity(0.1); fg = Colors.orange.shade800; label = 'Ação Necessária'; }
-    if (status == 'SCHEDULED') { bg = Colors.green.withOpacity(0.1); fg = Colors.green.shade800; label = 'Agendado'; }
-    if (status == 'RESOLVED') { bg = Colors.grey.shade100; fg = Colors.grey.shade600; label = 'Resolvido'; }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
-      child: Text(label, style: TextStyle(color: fg, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1)),
-    );
-  }
-}
+// Support for blur
+import 'dart:ui';
