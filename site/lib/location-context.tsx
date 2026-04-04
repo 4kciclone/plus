@@ -37,6 +37,17 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     if (savedCity && savedState) {
       setCity(savedCity);
       setStateCode(savedState);
+    } else {
+      // Auto-detect silently based on IP without prompting GPS permission immediately
+      fetch("https://ipapi.co/json/")
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.city && data.region_code) {
+            setCity(data.city);
+            setStateCode(data.region_code);
+          }
+        })
+        .catch(err => console.warn("Auto-IP detection warning:", err));
     }
   }, []);
 
@@ -71,10 +82,23 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           }
         },
         (error) => {
-          // Just silently catch and log to warn, avoiding unhandled promise rejections
-          console.warn("Geolocation warning:", error.message);
-          setLoading(false);
-          resolve();
+          // Fallback to IP geolocation silently
+          console.warn("Geolocation warning:", error.message, "- Trying IP Fallback...");
+          fetch("https://ipapi.co/json/")
+            .then(res => res.json())
+            .then(data => {
+              if (data && data.city && data.region_code) {
+                setCity(data.city);
+                setStateCode(data.region_code);
+                localStorage.setItem("plus-city", data.city);
+                localStorage.setItem("plus-state", data.region_code);
+              }
+            })
+            .catch(ipErr => console.warn("IP Geolocation fallback failed:", ipErr))
+            .finally(() => {
+              setLoading(false);
+              resolve();
+            });
         },
         { timeout: 8000 }
       );
