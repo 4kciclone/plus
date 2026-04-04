@@ -24,11 +24,11 @@ const STATE_MAP: Record<string, string> = {
 };
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
-  const [city, setCity] = useState("Valença");
-  const [stateCode, setStateCode] = useState("RJ");
+  const [city, setCity] = useState("Localização");
+  const [stateCode, setStateCode] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const isValenca = city.toLowerCase().includes("valença") && stateCode === "RJ";
+  const isValenca = city.toLowerCase().includes("valença");
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -55,7 +55,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             );
             const data = await res.json();
             
-            const detectedCity = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || "Valença";
+            const detectedCity = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || "Localização";
             const stateName = (data.address?.state || "").toLowerCase();
             const detectedState = data.address?.state_code?.toUpperCase() || STATE_MAP[stateName] || "RJ";
 
@@ -71,7 +71,8 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           }
         },
         (error) => {
-          console.error("Geolocation error:", error);
+          // Just silently catch and log to warn, avoiding unhandled promise rejections
+          console.warn("Geolocation warning:", error.message);
           setLoading(false);
           resolve();
         },

@@ -33,7 +33,7 @@ export function CitySelector() {
           <MapPin className={`w-3.5 h-3.5 ${isValenca ? "text-primary" : "text-amber-400"}`} />
         )}
         <span className="text-[11px] font-bold uppercase tracking-widest transition-colors">
-          {city} / {stateCode}
+          {city}{stateCode ? ` / ${stateCode}` : ""}
         </span>
         <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
       </button>
@@ -50,21 +50,34 @@ export function CitySelector() {
             {/* Header / Info */}
             <div className="p-4 border-b border-white/5 bg-white/5">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Sua Localização</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  {stateCode ? "Sua Localização" : "Onde você está?"}
+                </span>
                 {isValenca ? (
                   <span className="px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 text-[9px] font-black uppercase tracking-wider border border-green-500/20">
                     Área de Cobertura
                   </span>
-                ) : (
+                ) : stateCode ? (
                   <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[9px] font-black uppercase tracking-wider border border-amber-500/20">
                     Breve em sua região
                   </span>
+                ) : (
+                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/50 text-[9px] font-black uppercase tracking-wider border border-white/20">
+                    Não definido
+                  </span>
                 )}
               </div>
-              <p className="text-white font-bold text-sm">{city}, {stateCode}</p>
-              {!isValenca && (
+              <p className="text-white font-bold text-sm">
+                {city}{stateCode ? `, ${stateCode}` : ""}
+              </p>
+              {!isValenca && stateCode && (
                 <p className="text-[11px] text-white/50 mt-1 font-medium leading-relaxed">
                   Ainda não atendemos em {city}, mas você pode consultar a cobertura em Valença.
+                </p>
+              )}
+              {!stateCode && (
+                <p className="text-[11px] text-white/50 mt-1 font-medium leading-relaxed">
+                  Descubra os melhores planos disponíveis na sua região.
                 </p>
               )}
             </div>
