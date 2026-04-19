@@ -1,43 +1,177 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-primary: #E10098;
-  --color-primary-dark: #B30078;
-  --color-background: #F4F5F7;
-  --color-surface: #ffffff;
-  --color-success: #00e676;
-  --color-foreground: #111;
-  --color-muted: #94a3b8;
-  --font-sans: var(--font-dm-sans), sans-serif;
-  --font-sora: var(--font-sora), sans-serif;
+  /* === Velocity Magenta — Token System === */
+  
+  /* Primary */
+  --color-primary: #b90035;
+  --color-primary-dim: #a2002d;
+  --color-primary-container: #ff7481;
+  --color-primary-fixed: #ff7481;
+  --color-primary-fixed-dim: #ff586c;
+  --color-on-primary: #ffefef;
+  --color-on-primary-container: #4e0011;
+  --color-on-primary-fixed: #000000;
+  --color-inverse-primary: #ff5168;
+  
+  /* Secondary */
+  --color-secondary: #595689;
+  --color-secondary-dim: #4d4a7c;
+  --color-secondary-container: #d0ccff;
+  --color-secondary-fixed: #d0ccff;
+  --color-on-secondary: #f5f1ff;
+  --color-on-secondary-container: #444273;
+  
+  /* Tertiary */
+  --color-tertiary: #6b46ae;
+  --color-tertiary-dim: #5f39a1;
+  --color-tertiary-container: #c1a0ff;
+  --color-on-tertiary: #f9efff;
+  --color-on-tertiary-container: #3f1180;
+  
+  /* Error */
+  --color-error: #b02500;
+  --color-error-container: #f95630;
+  --color-on-error: #ffefec;
+  --color-on-error-container: #520c00;
+  
+  /* Surface System — "Optical Layers" */
+  --color-surface: #f5f6f8;
+  --color-surface-dim: #d1d5d8;
+  --color-surface-bright: #f5f6f8;
+  --color-surface-tint: #b90035;
+  --color-surface-variant: #dadde0;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #eff1f3;
+  --color-surface-container: #e6e8eb;
+  --color-surface-container-high: #e0e3e5;
+  --color-surface-container-highest: #dadde0;
+  --color-on-surface: #2c2f31;
+  --color-on-surface-variant: #595c5e;
+  --color-inverse-surface: #0c0f10;
+  --color-inverse-on-surface: #9b9d9f;
+  
+  /* Outline */
+  --color-outline: #757779;
+  --color-outline-variant: #abadaf;
+  
+  /* Background */
+  --color-background: #f5f6f8;
+  --color-on-background: #2c2f31;
+  --color-foreground: #2c2f31;
+  --color-muted: #595c5e;
+  --color-success: #00c853;
+  
+  /* Typography */
+  --font-headline: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
+  --font-body: var(--font-manrope), 'Manrope', sans-serif;
+  --font-label: var(--font-manrope), 'Manrope', sans-serif;
+  --font-sans: var(--font-manrope), 'Manrope', sans-serif;
+  
+  /* Default Border Radius reset (removing massive curves) */
 }
 
 @utility font-heading {
-  font-family: var(--font-sora);
+  font-family: var(--font-headline);
 }
 
+@utility font-body {
+  font-family: var(--font-body);
+}
+
+@utility font-label {
+  font-family: var(--font-label);
+}
+
+/* === Base Styles === */
 body {
-  background: #F4F5F7;
-  color: #111;
-  font-family: var(--font-sans);
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth scroll for anchor links */
+h1, h2, h3, h4 {
+  font-family: var(--font-headline);
+}
+
 html {
   scroll-behavior: smooth;
 }
 
-/* Button active state for all buttons */
+/* === Kinetic Layer — Hover Micro-interaction === */
+.kinetic-layer {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.kinetic-layer:hover {
+  transform: translateY(-8px);
+}
+
+/* === Glassmorphism Utility === */
+.glass-panel {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.glass-dark {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(20, 23, 26, 0.7);
+}
+
+/* === Kinetic Background — Ambient Gradients === */
+.kinetic-bg {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(185, 0, 53, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 90% 80%, rgba(89, 86, 137, 0.05) 0%, transparent 50%);
+}
+
+/* === Hero Gradient Overlay === */
+.hero-gradient {
+  background: linear-gradient(135deg, rgba(185, 0, 53, 0.85) 0%, rgba(89, 86, 137, 0.4) 100%);
+}
+
+/* === Ambient Shadow — No-Line Rule === */
+.shadow-ambient {
+  box-shadow: 0 20px 40px rgba(44, 47, 49, 0.06);
+}
+
+.shadow-ambient-lg {
+  box-shadow: 0 30px 60px rgba(44, 47, 49, 0.08);
+}
+
+/* === Kinetic Gradient (Admin button) === */
+.kinetic-gradient {
+  background: linear-gradient(135deg, #b90035 0%, #6b46ae 100%);
+}
+
+/* === Tonal Shift Transition === */
+.tonal-shift {
+  transition: background-color 0.3s ease;
+}
+
+/* === Button Active State === */
 button:active:not(:disabled) {
   transform: scale(0.97);
 }
 
-/* Transition for all interactive elements */
+/* === Interactive Element Transitions === */
 a, button {
   transition: all 0.2s ease;
 }
 
-/* Hide scrollbar for plan cards */
-.hide-scrollbar::-webkit-scrollbar {
+/* === No Scrollbar Utility === */
+.no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* === Material Symbols (for reference pages) === */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }

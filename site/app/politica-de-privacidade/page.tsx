@@ -3,61 +3,71 @@ import { Footer } from "@/components/layout/Footer";
 
 export default function PoliticaDePrivacidadePage() {
   return (
-    <>
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar />
-      <main className="min-h-screen bg-[#F4F5F7] pt-[120px] pb-20">
-        <div className="bg-[#080b12] py-12">
-          <div className="container mx-auto px-6 lg:px-12">
-            <h1 className="text-3xl font-extrabold text-white">Política de Privacidade</h1>
+      <main className="flex-1 w-full pt-32 pb-20">
+        
+        {/* Header */}
+        <div className="max-w-4xl mx-auto px-6 mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-6">
+            Termos Legais
           </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold font-heading text-on-surface tracking-tight">
+            Política de Privacidade
+          </h1>
+          <p className="text-on-surface-variant mt-4 text-lg">
+            Saiba como protegemos seus dados e informações na Plus Internet.
+          </p>
         </div>
-        <div className="container mx-auto px-6 lg:px-12 py-10 max-w-4xl">
-          <div className="bg-white rounded-2xl border border-black/5 shadow-sm p-8 md:p-12 prose prose-neutral max-w-none text-neutral-700 [&_h2]:text-neutral-900 [&_h2]:font-extrabold [&_h2]:text-xl [&_h2]:mt-8 [&_h2]:mb-3 [&_p]:leading-relaxed [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_li]:mb-2">
 
-            <p>A Plus Multiplayer criou o aplicativo Plus Multiplayer como um aplicativo gratuito. Este SERVIÇO é fornecido pela Plus Multiplayer sem nenhum custo e deve ser usado como está.</p>
+        {/* Content */}
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-ambient p-8 md:p-12 prose prose-neutral max-w-none text-on-surface-variant 
+            [&_h2]:text-on-surface [&_h2]:font-extrabold [&_h2]:font-heading [&_h2]:text-2xl [&_h2]:mt-10 [&_h2]:mb-4 
+            [&_p]:leading-relaxed [&_p]:mb-5 
+            [&_ul]:list-disc [&_ul]:pl-6 [&_li]:mb-3 [&_strong]:text-on-surface"
+          >
+
+            <p>A Plus Internet criou a plataforma digital como um serviço exclusivo aos assinantes e futuros clientes. Este SERVIÇO é fornecido pela Plus Internet sem nenhum custo e deve ser usado como está.</p>
 
             <p>Esta página é usada para informar os visitantes do site sobre nossas políticas de coleta, uso e divulgação de Informações Pessoais, se alguém decidir usar nosso Serviço.</p>
 
-            <p>Se você optar por usar nosso Serviço, concorda em coletar e usar informações em relação a esta política. As informações pessoais que coletamos são usadas para fornecer e melhorar o serviço. Não usaremos ou compartilharemos suas informações com ninguém, exceto conforme descrito nesta Política de Privacidade.</p>
+            <p>Se você optar por usar nosso Serviço, concorda com a coleta e uso de informações em relação a esta política. As informações pessoais que coletamos são usadas para fornecer e melhorar o serviço. Não usaremos ou compartilharemos suas informações com ninguém, exceto conforme descrito nesta Política de Privacidade.</p>
 
             <h2>Coleta e uso de informações</h2>
-            <p>Para uma melhor experiência ao usar nosso Serviço, podemos solicitar que você nos forneça certas informações de identificação pessoal, incluindo, entre outros, o nome do usuário, endereço, localização, fotos, dados de pagamentos. As informações que solicitamos são retidas no seu dispositivo e não são coletadas por nós de nenhuma forma, serão retidas por nós e usadas conforme descrito nesta política de privacidade.</p>
-            <p>O aplicativo usa serviços de terceiros que podem coletar informações usadas para identificá-lo.</p>
+            <p>Para uma melhor experiência ao usar nosso Serviço, podemos solicitar que você nos forneça certas informações de identificação pessoal, incluindo, entre outros, o <strong>nome do usuário, endereço, localização, e-mail e dados de pagamento criptografados</strong>. As informações que solicitamos são retidas pela Plus Internet com a mais alta tecnologia de segurança e usadas conforme descrito nesta política de privacidade.</p>
+            <p>O serviço utiliza ferramentas de terceiros (como Gateways de Pagamento) que podem coletar informações usadas para processar transações com segurança.</p>
 
-            <h2>Dados de log</h2>
-            <p>Queremos informar que, sempre que você usar nosso Serviço, em caso de erro no aplicativo, coletamos dados e informações (através de produtos de terceiros) no seu telefone chamado Log Data. Esses Dados de registro podem incluir informações como o endereço IP do seu dispositivo (&quot;IP&quot;), nome do dispositivo, versão do sistema operacional, configuração do aplicativo ao utilizar nosso Serviço, a hora e a data de seu uso do Serviço e outras estatísticas.</p>
+            <h2>Dados de Diagnóstico</h2>
+            <p>Abaixo detalhamos como tratamos as informações em caso de erros no aplicativo ou medições na rede. Podemos coletar dados e informações do seu roteador (via sistema gestor TR-069) chamados de "Dados de Diagnóstico". Esses dados podem incluir o endereço IP público, latência, tempo conectado (uptime), e atenuação da fibra (Potência Óptica).</p>
 
             <h2>Cookies</h2>
-            <p>Cookies são arquivos com pequena quantidade de dados que geralmente são usados como um identificador exclusivo anônimo. Este Serviço não usa esses &quot;cookies&quot; explicitamente. No entanto, o aplicativo pode usar código e bibliotecas de terceiros que usam &quot;cookies&quot; para coletar informações e melhorar seus serviços.</p>
+            <p>Cookies são arquivos com pequena quantidade de dados que geralmente são usados como um identificador exclusivo anônimo. Este Serviço utiliza "cookies" para gerenciar sessões do usuário conectado na Área do Assinante, bem como parâmetros de marketing para melhorar sua navegação pelos planos oferecidos.</p>
 
-            <h2>Provedores de serviço</h2>
-            <p>Podemos empregar empresas e indivíduos de terceiros para facilitar nosso serviço, fornecer o serviço em nosso nome, executar serviços relacionados ou nos ajudar a analisar como nosso Serviço é usado.</p>
+            <h2>Provedores de Serviço</h2>
+            <p>Podemos empregar empresas e terceiros para facilitar nosso serviço financeiro, fornecer redes de streaming em parceria ou nos ajudar a analisar como nosso Serviço é usado (Data Analytics).</p>
 
             <h2>Segurança</h2>
-            <p>Valorizamos sua confiança em nos fornecer suas informações pessoais, portanto, estamos nos esforçando para usar meios comercialmente aceitáveis de protegê-las. Mas lembre-se de que nenhum método de transmissão pela Internet ou método de armazenamento eletrônico é 100% seguro e confiável.</p>
+            <p>Valorizamos sua confiança em nos fornecer suas informações pessoais, portanto, toda a sua conexão com a plataforma da Plus Internet utiliza os mais modernos protocolos de segurança em trânsito (SSL) e armazenamento. Embora nos esforcemos para garantir máxima proteção, lembre-se de que a segurança das suas senhas também depende do dispositivo utilizado no acesso.</p>
 
             <h2>Links para outros sites</h2>
-            <p>Este serviço pode conter links para outros sites. Se você clicar em um link de terceiros, será direcionado para esse site. Observe que esses sites externos não são operados por nós.</p>
-
-            <h2>Privacidade das crianças</h2>
-            <p>Estes serviços não tratam de menores de 13 anos. Não coletamos intencionalmente informações pessoais identificáveis de crianças menores de 13 anos.</p>
+            <p>Este serviço pode conter links externos (ex: Streaming Parceiro, Banco). Ao clicar nestes links, você será direcionado para o respectivo site.</p>
 
             <h2>Alterações a esta Política de Privacidade</h2>
-            <p>Podemos atualizar nossa Política de Privacidade periodicamente. Essas alterações entram em vigor imediatamente após serem publicadas nesta página.</p>
+            <p>Podemos atualizar nossa Política de Privacidade periodicamente para adequá-la às exigências da LGPD (Lei Geral de Proteção de Dados Pessoais). As alterações entram em vigor imediatamente após sua atualização nesta página.</p>
 
-            <h2>Contate-Nos</h2>
-            <p>Se você tiver alguma dúvida ou sugestão sobre nossa Política de Privacidade, não hesite em nos contactar.</p>
+            <h2>Contato Oficial</h2>
+            <p>Se você tiver alguma dúvida ou solicitaçãoLGPD referente aos seus dados, não hesite em nos contactar através da nossa <a href="/duvidas" className="text-primary font-bold hover:underline">Central de Dúvidas</a>.</p>
 
-            <div className="border-t border-neutral-100 mt-10 pt-8">
-              <h2>Privacy Policy (English)</h2>
-              <p>Plus Multiplayer created the Plus Multiplayer application as a free application. This SERVICE is provided by Plus Multiplayer at no cost and must be used as is.</p>
-              <p>If you choose to use our Service, you agree to collect and use information in connection with this policy. The personal information we collect is used to provide and improve the service. We will not use or share your information with anyone except as described in this Privacy Policy.</p>
-              <p>If you have any questions or suggestions about our Privacy Policy, don&apos;t hesitate to contact us.</p>
+            <div className="border-t border-surface-container mt-12 pt-8">
+              <h2>Privacy Policy (English Translation Outline)</h2>
+              <p>Plus Internet operates this web platform as an essential service. We use your personal information solely to provide and improve the service. We will not use or share your information with anyone except as described in this Privacy Policy according to LGPD compliance.</p>
             </div>
           </div>
         </div>
+
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

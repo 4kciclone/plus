@@ -3,18 +3,17 @@ import dynamic from "next/dynamic";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
-import { MapPin, CheckCircle2 } from "lucide-react";
+import { MapPin, CheckCircle2, Search, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 // Leaflet must be rendered client-side only (no SSR)
 const CoverageMap = dynamic(() => import("@/components/map/CoverageMap"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[480px] rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-        <p className="text-neutral-500 text-sm font-medium">Carregando mapa...</p>
-      </div>
+    <div className="w-full h-full min-h-[500px] rounded-2xl bg-surface-container-high flex flex-col items-center justify-center animate-pulse">
+      <MapPin className="w-8 h-8 text-outline mb-3 opacity-50" />
+      <p className="text-on-surface-variant text-sm font-bold uppercase tracking-widest">Carregando Mapa...</p>
     </div>
   ),
 });
@@ -33,71 +32,109 @@ const bairros = [
 ];
 
 export default function CoberturaPage() {
+  const [search, setSearch] = useState("");
+
+  const filteredBairros = bairros.filter(b => b.toLowerCase().includes(search.toLowerCase()));
+
   return (
-    <>
+    <div className="min-h-screen bg-surface flex flex-col">
       <Navbar />
-      <main className="min-h-screen bg-[#F4F5F7] pt-[120px] pb-20">
-        {/* Hero */}
-        <div className="bg-[#080b12] py-12">
-          <div className="container mx-auto px-6 lg:px-12 flex items-center gap-3">
-            <MapPin className="w-6 h-6 text-primary" />
-            <div>
-              <h1 className="text-3xl font-extrabold text-white">Área de Cobertura</h1>
-              <p className="text-white/50">Fibra óptica 100% em {bairros.length} bairros de Valença/RJ</p>
+      
+      <main className="flex-1 w-full pt-32 pb-20">
+        <div className="max-w-7xl mx-auto px-6">
+          
+          {/* Hero Section */}
+          <div className="mb-12 max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 text-success text-xs font-bold uppercase tracking-widest mb-6">
+              <span className="w-2 h-2 bg-success rounded-full animate-pulse" />
+              100% Fibra Óptica Ativa
             </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold font-heading text-on-surface tracking-tight mb-4">
+              Internet que chega até <span className="text-primary italic">você.</span>
+            </h1>
+            <p className="text-xl text-on-surface-variant leading-relaxed">
+              Atendemos dezenas de bairros em Valença/RJ com a infraestrutura mais robusta da região. Explore o mapa ou busque seu CEP.
+            </p>
           </div>
-        </div>
 
-        <div className="container mx-auto px-6 lg:px-12 py-10">
-
-          {/* Interactive Map */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-extrabold text-neutral-900">Mapa interativo</h2>
-                <p className="text-sm text-neutral-500 font-medium mt-0.5">Clique em qualquer bairro no mapa para detalhes</p>
+          {/* Main Grid: Map + Bairros */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[700px] mb-20">
+            {/* Map Area (8 cols) */}
+            <div className="lg:col-span-8 bg-surface-container-lowest rounded-2xl shadow-ambient overflow-hidden relative">
+              {/* CoverageMap component spans full height/width */}
+              <div className="absolute inset-0 z-0">
+                 <CoverageMap />
               </div>
-              <span className="hidden sm:flex items-center gap-2 text-xs text-neutral-500 font-medium">
-                <span className="w-3 h-3 rounded-full bg-primary inline-block" /> Cobertura ativa
-              </span>
-            </div>
-            <CoverageMap />
-          </div>
-
-          {/* Bairros List */}
-          <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
-            <div className="px-6 md:px-10 py-6 border-b border-neutral-100 flex items-center justify-between">
-              <h2 className="text-xl font-extrabold text-neutral-900">Bairros atendidos</h2>
-              <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full">{bairros.length} regiões</span>
-            </div>
-            <div className="px-6 md:px-10 py-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-8">
-              {bairros.map((bairro, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" strokeWidth={2.5} />
-                  <span className="text-neutral-700 font-medium text-[15px]">{bairro}</span>
+              
+              {/* Floating Map Header */}
+              <div className="absolute top-6 left-6 right-6 z-10 flex items-center justify-between pointer-events-none">
+                <div className="bg-white/90 backdrop-blur-md px-6 py-4 rounded-2xl shadow-lg border border-white/20 pointer-events-auto">
+                  <h2 className="text-lg font-bold font-heading">Mapa de Operação</h2>
+                  <p className="text-xs text-on-surface-variant font-bold uppercase tracking-widest mt-1">Valença — RJ</p>
                 </div>
-              ))}
+              </div>
             </div>
-            <div className="px-6 md:px-10 py-6 border-t border-neutral-100 bg-neutral-50 flex flex-col sm:flex-row items-center gap-4 justify-between">
-              <p className="text-neutral-500 text-sm font-medium">Não encontrou seu bairro?</p>
-              <a
-                href="https://wa.me/5524981206500"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-colors"
-              >
-                Consultar cobertura via WhatsApp
-              </a>
+
+            {/* Sidebar Bairros (4 cols) */}
+            <div className="lg:col-span-4 bg-surface-container-lowest rounded-2xl shadow-ambient flex flex-col overflow-hidden">
+              <div className="p-6 border-b border-surface-container">
+                <h3 className="font-bold text-lg font-heading mb-4 text-on-surface">Bairros Atendidos</h3>
+                
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-outline" />
+                  <input
+                    type="text"
+                    placeholder="Buscar bairro..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-surface-container-low border-none rounded-xl pl-12 pr-4 py-3 text-sm text-on-surface font-bold focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline/70"
+                  />
+                </div>
+              </div>
+
+              {/* Scrollable List */}
+              <div className="flex-1 overflow-y-auto no-scrollbar p-6 bg-surface-container-lowest">
+                {filteredBairros.length === 0 ? (
+                  <div className="text-center text-on-surface-variant py-10 font-bold">
+                    Nenhum bairro encontrado.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredBairros.map((bairro, i) => (
+                      <div 
+                        key={i} 
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors group cursor-default"
+                      >
+                        <CheckCircle2 className="w-5 h-5 text-success shrink-0" strokeWidth={3} />
+                        <span className="text-on-surface font-bold text-sm group-hover:text-primary transition-colors">{bairro}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6 bg-surface-container-low border-t border-surface-container">
+                <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest mb-3 text-center">
+                  Não achou seu bairro?
+                </p>
+                <a
+                  href="https://wa.me/5524981206500"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-on-surface text-surface py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-transform"
+                >
+                  Consultar Viabilidade <ArrowRight className="w-4 h-4" />
+                </a>
+              </div>
             </div>
           </div>
 
-          <div className="mt-8 text-center">
-            <Link href="/#residencial" className="text-primary font-bold hover:underline">← Ver planos disponíveis</Link>
-          </div>
         </div>
       </main>
+
       <Footer />
       <FloatingWhatsApp />
-    </>
+    </div>
   );
 }

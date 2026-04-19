@@ -3,84 +3,102 @@ import { useState } from "react";
 import { Send, CheckCircle2 } from "lucide-react";
 
 export function LeadCaptureSection() {
-  const [form, setForm] = useState({ name: "", phone: "", bairro: "" });
+  const [form, setForm] = useState({ name: "", phone: "", cep: "" });
   const [sent, setSent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const text = `Olá! Sou ${form.name}, moro no bairro ${form.bairro} e meu telefone é ${form.phone}. Gostaria de ser Plus!`;
+    const text = `Olá! Sou ${form.name}, meu CEP é ${form.cep} e meu telefone é ${form.phone}. Gostaria de ser Plus!`;
     window.open(`https://wa.me/5524981206500?text=${encodeURIComponent(text)}`, "_blank");
     setSent(true);
   };
 
   return (
-    <section className="py-20 bg-[#080b12]" id="contato">
-      <div className="container mx-auto px-6 lg:px-12 max-w-5xl">
-        <div className="bg-[#111827] rounded-3xl border border-white/5 overflow-hidden flex flex-col lg:flex-row">
-          {/* Info */}
-          <div className="lg:w-1/2 p-10 lg:p-14 flex flex-col justify-center">
-            <span className="text-primary font-bold text-xs uppercase tracking-widest mb-4">Eu quero ser Plus!</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">
-              Fale com a gente em 1 clique
-            </h2>
-            <p className="text-white/50 text-lg leading-relaxed">
-              Preencha seus dados abaixo — sem enrolação, sem cadastro longo. Nós te chamamos no WhatsApp para finalizar tudo rapidinho.
-            </p>
-          </div>
+    <section className="py-24 bg-surface-container-low" id="contato">
+      <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-extrabold font-heading tracking-tight text-on-surface mb-4">
+            Consulte Disponibilidade
+          </h2>
+          <p className="text-on-surface-variant text-lg max-w-xl mx-auto">
+            Deixe seus dados e nossa equipe entrará em contato com a melhor oferta para você.
+          </p>
+        </div>
 
-          {/* Form */}
-          <div className="lg:w-1/2 p-10 lg:p-14 bg-[#0d1220]">
-            {sent ? (
-              <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                <CheckCircle2 className="w-16 h-16 text-green-400 mb-4" />
-                <h3 className="text-2xl font-extrabold text-white mb-2">Mensagem enviada!</h3>
-                <p className="text-white/50">Confira sua conversa no WhatsApp.</p>
+        {/* Form Card */}
+        <div className="bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-ambient">
+          {sent ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                <CheckCircle2 className="w-10 h-10 text-primary" />
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-bold text-white/70 mb-1.5">Seu nome</label>
+              <h3 className="text-2xl font-extrabold text-on-surface mb-2 font-heading">
+                Mensagem enviada!
+              </h3>
+              <p className="text-on-surface-variant">
+                Confira sua conversa no WhatsApp.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-on-surface-variant ml-1">
+                    Nome Completo
+                  </label>
                   <input
                     type="text"
-                    placeholder="João Silva"
+                    placeholder="Seu nome"
                     required
                     value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-white/10 text-white font-medium text-[15px] bg-transparent focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full bg-surface-container-highest border-none rounded-[1rem] px-4 py-4 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-white/70 mb-1.5">Telefone / WhatsApp</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-on-surface-variant ml-1">
+                    WhatsApp
+                  </label>
                   <input
                     type="tel"
-                    placeholder="(24) 99999-9999"
+                    placeholder="(00) 00000-0000"
                     required
                     value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-white/10 text-white font-medium text-[15px] bg-transparent focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="w-full bg-surface-container-highest border-none rounded-[1rem] px-4 py-4 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-white/70 mb-1.5">Bairro</label>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 space-y-2">
+                  <label className="text-sm font-semibold text-on-surface-variant ml-1">
+                    CEP da Instalação
+                  </label>
                   <input
                     type="text"
-                    placeholder="Centro, Serra da Glória..."
+                    placeholder="00000-000"
                     required
-                    value={form.bairro}
-                    onChange={e => setForm({ ...form, bairro: e.target.value })}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-white/10 text-white font-medium text-[15px] bg-transparent focus:outline-none focus:border-primary transition-colors placeholder:text-white/20"
+                    value={form.cep}
+                    onChange={(e) => setForm({ ...form, cep: e.target.value })}
+                    className="w-full bg-surface-container-highest border-none rounded-[1rem] px-4 py-4 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-outline"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full h-12 rounded-full bg-primary text-white font-bold text-[15px] hover:bg-[#c5007e] transition-colors flex items-center justify-center gap-2"
+                  className="px-10 py-4 rounded-xl bg-primary text-on-primary font-bold text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 whitespace-nowrap"
                 >
-                  <Send className="w-4 h-4" /> Quero ser Plus!
+                  <Send className="w-4 h-4" />
+                  Verificar
                 </button>
-                <p className="text-white/20 text-xs text-center">Ao enviar, você será redirecionado ao WhatsApp da Plus.</p>
-              </form>
-            )}
-          </div>
+              </div>
+
+              <p className="text-outline text-xs text-center pt-2">
+                Ao enviar, você será redirecionado ao WhatsApp da Plus.
+              </p>
+            </form>
+          )}
         </div>
       </div>
     </section>

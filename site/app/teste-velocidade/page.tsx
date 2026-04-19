@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
 import { Gauge, Download, Upload, Clock, RotateCcw } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -31,7 +31,6 @@ export default function TesteVelocidadePage() {
       pings.push(elapsed);
       setProgress(((i + 1) / 10) * 100);
     }
-    // Remove highest and lowest, average the rest
     pings.sort((a, b) => a - b);
     const trimmed = pings.slice(1, -1);
     const avg = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
@@ -46,7 +45,7 @@ export default function TesteVelocidadePage() {
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const sizeMB = 25; // Download 25MB
+    const sizeMB = 25;
     const startTime = performance.now();
     let received = 0;
     const totalBytes = sizeMB * 1024 * 1024;
@@ -73,9 +72,7 @@ export default function TesteVelocidadePage() {
       const totalTime = (performance.now() - startTime) / 1000;
       const finalSpeed = Math.round((received * 8) / (totalTime * 1000000));
       setDownload(finalSpeed);
-    } catch {
-      // aborted or network error
-    }
+    } catch { } // network error
   }, []);
 
   // --- UPLOAD TEST ---
@@ -86,7 +83,6 @@ export default function TesteVelocidadePage() {
 
     const sizeMB = 10;
     const data = new Uint8Array(sizeMB * 1024 * 1024);
-    // Fill with random-ish data
     for (let i = 0; i < data.length; i += 4096) {
       data[i] = Math.random() * 256;
     }
@@ -105,9 +101,7 @@ export default function TesteVelocidadePage() {
       const speedMbps = Math.round((data.length * 8) / (totalTime * 1000000));
       setUpload(speedMbps);
       setProgress(100);
-    } catch {
-      // error
-    }
+    } catch { } // network error
   }, []);
 
   // --- RUN FULL TEST ---
@@ -142,19 +136,11 @@ export default function TesteVelocidadePage() {
     }
   };
 
-  const getArcColor = () => {
-    if (phase === "done") return "#00E676";
-    if (phase === "ping") return "#FFC107";
-    if (phase === "upload") return "#00BFFF";
-    return "#FF0080"; // Download / Plus Pink
-  };
-
-  const speedAngle = Math.min((currentSpeed / 1000) * 180, 180) - 90; // -90 (left) to 90 (right)
+  const speedAngle = Math.min((currentSpeed / 1000) * 180, 180) - 90;
 
   const getDisplayValue = () => {
     if (phase === "ping") return ping || "...";
-    if (phase === "download") return currentSpeed || "...";
-    if (phase === "upload") return currentSpeed || "...";
+    if (phase === "download" || phase === "upload") return currentSpeed || "...";
     if (phase === "done") return download;
     return 0;
   };
@@ -165,16 +151,25 @@ export default function TesteVelocidadePage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-slate-950 font-sans selection:bg-primary/30 flex flex-col">
       <Navbar />
-      <main className="min-h-screen bg-[#080b12] pt-[120px] pb-20 flex flex-col items-center">
-        <div className="container mx-auto px-6 lg:px-12 py-16 text-center max-w-3xl">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4">Teste de Velocidade</h1>
-          <p className="text-white/50 text-lg mb-12">Mede a velocidade real da sua conexão contra o servidor da Plus.</p>
+      <main className="flex-1 w-full pt-32 pb-20 flex flex-col items-center justify-center relative overflow-hidden">
+        
+        {/* Kinetic Light Effects */}
+        <div className="absolute top-1/4 -right-1/4 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-1/4 -left-1/4 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none" />
 
-          {/* High Fidelity Speedometer Circle */}
-          <div className="relative w-[320px] h-[220px] mx-auto mb-6 flex flex-col items-center justify-end overflow-hidden pb-4">
-            <svg viewBox="0 0 200 120" className="w-full h-full drop-shadow-xl overflow-visible">
+        <div className="container mx-auto px-6 max-w-3xl text-center relative z-10">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold font-heading text-white tracking-tighter mb-4">
+            Speed<span className="text-primary italic">Test</span>
+          </h1>
+          <p className="text-slate-400 text-lg mb-16 max-w-lg mx-auto leading-relaxed">
+            Mede a latência e as velocidades de download e upload direto para a infraestrutura core da Plus Internet.
+          </p>
+
+          {/* High Fidelity Speedometer */}
+          <div className="relative w-full max-w-[400px] h-[260px] mx-auto mb-8 flex flex-col items-center justify-end overflow-hidden pb-6">
+            <svg viewBox="0 0 200 120" className="w-full h-full drop-shadow-2xl overflow-visible">
               <defs>
                 <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="#00BFFF" />
@@ -182,7 +177,7 @@ export default function TesteVelocidadePage() {
                   <stop offset="100%" stopColor="#FF8C00" />
                 </linearGradient>
                 <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feGaussianBlur stdDeviation="4" result="blur" />
                   <feComposite in="SourceGraphic" in2="blur" operator="over" />
                 </filter>
               </defs>
@@ -191,30 +186,30 @@ export default function TesteVelocidadePage() {
               <path
                 d="M 20 100 A 80 80 0 0 1 180 100"
                 fill="none"
-                stroke="#1a1f2e"
-                strokeWidth="12"
+                stroke="#1e293b"
+                strokeWidth="10"
                 strokeLinecap="round"
               />
 
               {/* Ticks */}
-              {Array.from({ length: 11 }).map((_, i) => {
-                const angle = (i * 18) - 180;
+              {Array.from({ length: 21 }).map((_, i) => {
+                const angle = (i * 9) - 180;
                 const rad = (angle * Math.PI) / 180;
-                const x1 = 100 + 70 * Math.cos(rad);
-                const y1 = 100 + 70 * Math.sin(rad);
-                const x2 = 100 + 64 * Math.cos(rad);
-                const y2 = 100 + 64 * Math.sin(rad);
+                const x1 = 100 + 74 * Math.cos(rad);
+                const y1 = 100 + 74 * Math.sin(rad);
+                const x2 = 100 + 68 * Math.cos(rad);
+                const y2 = 100 + 68 * Math.sin(rad);
                 return (
-                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#ffffff" strokeOpacity="0.2" strokeWidth="2" />
+                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth="2" strokeLinecap="round" />
                 );
               })}
 
-              {/* Animated Foreground Arc (Progress mapped to Speed) */}
+              {/* Animated Foreground Arc */}
               <motion.path
                 d="M 20 100 A 80 80 0 0 1 180 100"
                 fill="none"
-                stroke={phase === 'idle' ? '#1a1f2e' : `url(#speedGradient)`}
-                strokeWidth="12"
+                stroke={phase === 'idle' ? '#1e293b' : 'url(#speedGradient)'}
+                strokeWidth="10"
                 strokeLinecap="round"
                 strokeDasharray="251.2"
                 strokeDashoffset={251.2 - (251.2 * (Math.min(currentSpeed, 1000) / 1000))}
@@ -225,7 +220,7 @@ export default function TesteVelocidadePage() {
               />
 
               {/* Center Pivot */}
-              <circle cx="100" cy="100" r="8" fill="#111827" stroke="#ffffff" strokeWidth="3" />
+              <circle cx="100" cy="100" r="6" fill="#f8fafc" />
 
               {/* Animated Needle */}
               <motion.g
@@ -234,71 +229,80 @@ export default function TesteVelocidadePage() {
                 transition={{ type: "spring", stiffness: 100, damping: 10 }}
                 style={{ originX: "100px", originY: "100px" }}
               >
-                <polygon points="97,100 103,100 100,25" fill="#ffffff" filter="url(#glow)" />
+                <polygon points="98,100 102,100 100,30" fill="#f8fafc" filter="url(#glow)" />
               </motion.g>
             </svg>
             
-            <div className="absolute bottom-4 flex flex-col items-center justify-center">
+            <div className="absolute bottom-6 flex flex-col items-center justify-center">
               {phase === "idle" ? (
-                <div className="flex flex-col items-center opacity-40">
-                  <Gauge className="w-8 h-8 text-white mb-1" />
-                  <span className="text-xs font-bold uppercase tracking-widest text-white">Pronto</span>
+                <div className="flex flex-col items-center text-slate-500">
+                  <Gauge className="w-8 h-8 mb-2" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Pronto</span>
                 </div>
               ) : (
                 <div className="flex flex-col items-center">
-                  <span className="text-5xl font-extrabold text-white tabular-nums tracking-tighter" style={{ textShadow: "0 0 20px rgba(255,255,255,0.3)" }}>
+                  <span className="text-6xl font-extrabold text-white tabular-nums tracking-tighter" style={{ textShadow: "0 0 30px rgba(255,255,255,0.2)" }}>
                     {getDisplayValue()}
                   </span>
-                  <span className="text-white/60 text-[10px] font-bold uppercase tracking-widest mt-1">{getDisplayUnit()}</span>
+                  <span className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">{getDisplayUnit()}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Phase Label */}
-          {isRunning && (
-            <p className="text-white/40 font-bold text-sm uppercase tracking-widest mb-8 animate-pulse">{getPhaseLabel()}</p>
-          )}
+          <div className="h-8 mb-8">
+            {isRunning && (
+              <p className="text-primary font-bold text-sm uppercase tracking-widest animate-pulse">
+                {getPhaseLabel()}
+              </p>
+            )}
+          </div>
 
           {/* Action Button */}
-          {!isRunning && (
-            <button
-              onClick={runTest}
-              className="px-12 py-4 rounded-full bg-primary text-white font-extrabold text-lg hover:bg-[#c5007e] transition-colors mb-12 inline-flex items-center gap-3"
-            >
-              {phase === "done" ? <><RotateCcw className="w-5 h-5" /> Testar Novamente</> : "Iniciar Teste"}
-            </button>
-          )}
+          <div className="h-20 flex justify-center mb-12">
+            {!isRunning && (
+              <button
+                onClick={runTest}
+                className="px-14 py-5 rounded-full bg-primary text-white font-black text-lg hover:scale-105 active:scale-95 transition-transform shadow-lg shadow-primary/20 flex items-center justify-center gap-3 uppercase tracking-wider"
+              >
+                {phase === "done" ? <><RotateCcw className="w-5 h-5" /> Testar Novamente</> : "Iniciar Teste"}
+              </button>
+            )}
+          </div>
 
-          {/* Results */}
-          {phase === "done" && (
-            <div className="grid grid-cols-3 gap-4 max-w-md mx-auto mt-4">
-              <div className="bg-[#111827] rounded-2xl p-6 border border-white/5">
-                <Download className="w-6 h-6 text-primary mx-auto mb-2" />
-                <p className="text-3xl font-extrabold text-white tabular-nums">{download}</p>
-                <p className="text-white/40 text-xs font-bold uppercase tracking-wider mt-1">Download Mbps</p>
-              </div>
-              <div className="bg-[#111827] rounded-2xl p-6 border border-white/5">
-                <Upload className="w-6 h-6 text-primary mx-auto mb-2" />
-                <p className="text-3xl font-extrabold text-white tabular-nums">{upload}</p>
-                <p className="text-white/40 text-xs font-bold uppercase tracking-wider mt-1">Upload Mbps</p>
-              </div>
-              <div className="bg-[#111827] rounded-2xl p-6 border border-white/5">
-                <Clock className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                <p className="text-3xl font-extrabold text-white tabular-nums">{ping}</p>
-                <p className="text-white/40 text-xs font-bold uppercase tracking-wider mt-1">Ping ms</p>
-              </div>
-            </div>
-          )}
+          {/* Results Grid */}
+          <AnimatePresence>
+            {phase === "done" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto"
+              >
+                {[
+                  { icon: Download, label: "Download", value: download, unit: "Mbps", text: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20" },
+                  { icon: Upload, label: "Upload", value: upload, unit: "Mbps", text: "text-cyan-400", bg: "bg-cyan-400/10", border: "border-cyan-400/20" },
+                  { icon: Clock, label: "Ping", value: ping, unit: "ms", text: "text-orange-400", bg: "bg-orange-400/10", border: "border-orange-400/20" },
+                ].map((r, i) => (
+                  <div key={i} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group">
+                     {/* Glow */}
+                     <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full blur-2xl transition-all ${r.bg} lg:opacity-50 lg:group-hover:opacity-100`} />
+                     <div className="relative z-10">
+                        <r.icon className={`w-8 h-8 mb-4 ${r.text}`} />
+                        <p className="text-5xl font-black text-white tabular-nums tracking-tighter mb-1">{r.value}</p>
+                        <p className="text-slate-500 font-bold text-xs uppercase tracking-widest">{r.label} <span className="text-slate-600">{r.unit}</span></p>
+                     </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <p className="text-white/20 text-xs mt-10 max-w-md mx-auto">
-            Este teste mede a velocidade real entre o seu dispositivo e o servidor da Plus Internet.
-            Os resultados podem variar conforme conexão Wi-Fi, cabo, horário e quantidade de dispositivos conectados.
-          </p>
         </div>
       </main>
       <Footer />
       <FloatingWhatsApp />
-    </>
+    </div>
   );
 }

@@ -1,30 +1,32 @@
 import type { Metadata } from "next";
-import { Sora, DM_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Manrope } from "next/font/google";
 import { AuthProvider } from "@/lib/auth-context";
 import { LocationProvider } from "@/lib/location-context";
 import { CookieConsent } from "@/components/layout/CookieConsent";
 import { LunaChatWidget } from "@/components/layout/LunaChatWidget";
 import "./globals.css";
 
-const sora = Sora({
-  variable: "--font-sora",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "600", "700", "800"],
 });
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const manrope = Manrope({
+  variable: "--font-manrope",
   subsets: ["latin"],
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "Plus Internet | Velocidade que você sente",
-  description: "Internet Fibra Óptica Premium de ultra velocidade para sua casa e empresa com Wi-Fi 6 incluso.",
-  keywords: "internet, provedor de internet, fibra óptica, plus internet, wi-fi 6",
+  title: "Plus Internet | High-Velocity Connectivity",
+  description: "Internet Fibra Óptica de alta performance para sua casa e empresa. Ultravelocidade, estabilidade garantida e suporte premium.",
+  keywords: "internet, provedor de internet, fibra óptica, plus internet, wi-fi 6, ultravelocidade",
   openGraph: {
-    title: "Plus Internet | Velocidade que você sente",
-    description: "Assine já e transforme sua experiência de conexão.",
+    title: "Plus Internet | High-Velocity Connectivity",
+    description: "Assine já e transforme sua experiência de conexão com fibra óptica de verdade.",
     url: "https://plusinternet.com.br",
     siteName: "Plus Internet",
     locale: "pt_BR",
@@ -41,9 +43,9 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       data-scroll-behavior="smooth"
-      className={`${sora.variable} ${dmSans.variable} antialiased min-h-[100dvh]`}
+      className={`${plusJakartaSans.variable} ${manrope.variable} antialiased min-h-[100dvh]`}
     >
-      <body className="min-h-[100dvh] flex flex-col font-sans bg-[#F4F5F7] text-neutral-900">
+      <body className="min-h-[100dvh] flex flex-col font-body bg-surface text-on-surface">
         <LocationProvider>
           <AuthProvider>
             {children}

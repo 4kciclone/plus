@@ -3,86 +3,251 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-
+import { LogIn, UserPlus, ArrowRight } from "lucide-react";
 import { Suspense } from "react";
 
 function LoginContent() {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+
+  // Login form
+  const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [loginError, setLoginError] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // Register form
+  const [regForm, setRegForm] = useState({ name: "", email: "", cpf: "", password: "", address: "" });
+  const [regError, setRegError] = useState("");
+  const [regLoading, setRegLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setLoading(true);
+    setLoginError("");
+    setLoginLoading(true);
     try {
-      await login(form.email, form.password);
+      await login(loginForm.email, loginForm.password);
       router.push(redirect || "/area-do-assinante");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro ao entrar.");
+      setLoginError(err instanceof Error ? err.message : "Erro ao entrar.");
     } finally {
-      setLoading(false);
+      setLoginLoading(false);
     }
   };
 
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegError("");
+    setRegLoading(true);
+    try {
+      await register(regForm);
+      router.push("/area-do-assinante");
+    } catch (err: unknown) {
+      setRegError(err instanceof Error ? err.message : "Erro ao cadastrar.");
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
+  const handleRegChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRegForm({ ...regForm, [e.target.name]: e.target.value });
+  };
+
   return (
-    <>
-      <Navbar />
-      <main className="min-h-screen bg-[#F4F5F7] pt-[120px] pb-20 flex items-start justify-center px-4">
-        <div className="w-full max-w-md bg-white rounded-2xl border border-black/5 shadow-sm p-10 mt-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-extrabold text-neutral-900">Entrar</h1>
-            <p className="text-neutral-500 mt-2">Acesse sua área do assinante.</p>
+    <div className="min-h-screen bg-surface flex flex-col">
+      {/* Minimal Header */}
+      <header className="w-full z-50 bg-white/80 backdrop-blur-xl border-b border-surface-container">
+        <div className="flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
+          <Link href="/" className="text-2xl font-black text-primary italic tracking-tighter font-headline">
+            Plus Internet
+          </Link>
+          <Link href="/" className="text-sm font-bold text-on-surface-variant hover:text-primary transition-colors">
+            Voltar ao site
+          </Link>
+        </div>
+      </header>
+
+      <main className="flex-1 flex items-center justify-center py-16 px-4">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-ambient overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-surface-container">
+            <button
+              onClick={() => setActiveTab("login")}
+              className={`flex-1 py-4 text-center font-bold text-sm flex items-center justify-center gap-2 transition-colors ${
+                activeTab === "login"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-on-surface-variant hover:bg-surface-container-low"
+              }`}
+            >
+              <LogIn className="w-4 h-4" />
+              Entrar na Conta
+            </button>
+            <button
+              onClick={() => setActiveTab("register")}
+              className={`flex-1 py-4 text-center font-bold text-sm flex items-center justify-center gap-2 transition-colors ${
+                activeTab === "register"
+                  ? "text-primary border-b-2 border-primary bg-primary/5"
+                  : "text-on-surface-variant hover:bg-surface-container-low"
+              }`}
+            >
+              <UserPlus className="w-4 h-4" />
+              Criar Cadastro
+            </button>
           </div>
 
-          {error && (
-            <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium">{error}</div>
-          )}
+          <div className="p-8">
+            {/* Login View */}
+            {activeTab === "login" && (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-headline font-extrabold text-on-surface">Bem-vindo de volta</h2>
+                  <p className="text-sm text-on-surface-variant mt-1">Insira seus dados para acessar sua área do assinante.</p>
+                </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-1.5">E-mail</label>
-              <input type="email" placeholder="joao@email.com.br" value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })} required
-                className="w-full h-12 px-4 rounded-xl border-2 border-neutral-200 text-neutral-900 font-medium text-[15px] focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-neutral-700 mb-1.5">Senha</label>
-              <input type="password" placeholder="Sua senha" value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })} required
-                className="w-full h-12 px-4 rounded-xl border-2 border-neutral-200 text-neutral-900 font-medium text-[15px] focus:outline-none focus:border-primary transition-colors"
-              />
-            </div>
-            <button type="submit" disabled={loading}
-              className="w-full h-12 rounded-full bg-primary text-white font-bold text-[16px] mt-2 hover:bg-primary-dark transition-colors disabled:opacity-60">
-              {loading ? "Entrando..." : "Entrar"}
-            </button>
-          </form>
+                {loginError && (
+                  <div className="mb-6 px-4 py-3 bg-error/10 text-error rounded-xl text-sm font-medium border border-error/20">
+                    {loginError}
+                  </div>
+                )}
 
-          <p className="text-center text-neutral-500 text-sm mt-6">
-            Não tem conta?{" "}
-            <Link href="/cadastro" className="text-primary font-bold hover:underline">Criar conta grátis</Link>
-          </p>
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-on-surface-variant ml-1 uppercase tracking-wider">E-mail</label>
+                    <input
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={loginForm.email}
+                      onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
+                      required
+                      className="w-full bg-surface-container-low border border-surface-container rounded-xl px-4 py-3 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-bold text-on-surface-variant ml-1 uppercase tracking-wider">Senha</label>
+                      <button type="button" className="text-xs font-bold text-primary hover:underline">
+                        Esqueceu a senha?
+                      </button>
+                    </div>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={loginForm.password}
+                      onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })}
+                      required
+                      className="w-full bg-surface-container-low border border-surface-container rounded-xl px-4 py-3 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loginLoading}
+                    className="w-full bg-primary text-white py-3.5 mt-2 rounded-xl font-bold hover:bg-primary-dim active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-60"
+                  >
+                    {loginLoading ? "Entrando..." : "Acessar Conta"}
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* Register View */}
+            {activeTab === "register" && (
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-headline font-extrabold text-on-surface">Nova Assinatura</h2>
+                  <p className="text-sm text-on-surface-variant mt-1">Preencha seus dados para começar.</p>
+                </div>
+
+                {regError && (
+                  <div className="mb-6 px-4 py-3 bg-error/10 text-error rounded-xl text-sm font-medium border border-error/20">
+                    {regError}
+                  </div>
+                )}
+
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-on-surface-variant ml-1 uppercase tracking-wider">Nome Completo</label>
+                    <input
+                      name="name"
+                      type="text"
+                      placeholder="Como deseja ser chamado?"
+                      value={regForm.name}
+                      onChange={handleRegChange}
+                      required
+                      className="w-full bg-surface-container-low border border-surface-container rounded-xl px-4 py-3 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-on-surface-variant ml-1 uppercase tracking-wider">CPF</label>
+                      <input
+                        name="cpf"
+                        type="text"
+                        placeholder="000.000.000-00"
+                        value={regForm.cpf}
+                        onChange={handleRegChange}
+                        required
+                        className="w-full bg-surface-container-low border border-surface-container rounded-xl px-4 py-3 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-on-surface-variant ml-1 uppercase tracking-wider">Telefone</label>
+                      <input
+                        name="phone"
+                        type="text"
+                        placeholder="(00) 00000-0000"
+                        className="w-full bg-surface-container-low border border-surface-container rounded-xl px-4 py-3 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-on-surface-variant ml-1 uppercase tracking-wider">E-mail</label>
+                    <input
+                      name="email"
+                      type="email"
+                      placeholder="contato@exemplo.com"
+                      value={regForm.email}
+                      onChange={handleRegChange}
+                      required
+                      className="w-full bg-surface-container-low border border-surface-container rounded-xl px-4 py-3 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-on-surface-variant ml-1 uppercase tracking-wider">Senha de Acesso</label>
+                    <input
+                      name="password"
+                      type="password"
+                      placeholder="Mínimo 8 caracteres"
+                      value={regForm.password}
+                      onChange={handleRegChange}
+                      required
+                      className="w-full bg-surface-container-low border border-surface-container rounded-xl px-4 py-3 text-on-surface font-medium focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-outline"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={regLoading}
+                    className="w-full bg-on-surface text-white py-3.5 mt-2 rounded-xl font-bold hover:bg-neutral-800 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                  >
+                    {regLoading ? "Criando..." : "Confirmar Cadastro"}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#F4F5F7] pt-[120px] pb-20 flex flex-col items-center justify-center gap-4">
-        <p className="text-neutral-500 font-medium">Carregando...</p>
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center">Carregando...</div>}>
       <LoginContent />
     </Suspense>
   );
