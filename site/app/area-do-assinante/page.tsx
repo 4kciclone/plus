@@ -55,7 +55,9 @@ export default function AreaAssinantePage() {
     <div className="bg-surface text-on-surface min-h-screen flex flex-col md:flex-row">
       {/* SideNavBar Component */}
       <aside className="h-screen w-64 fixed left-0 top-0 bg-white border-r border-slate-100 z-40 hidden md:flex flex-col p-4">
-        <div className="text-xl font-black text-primary mb-8 px-4 italic tracking-tighter">Plus Internet</div>
+        <Link href="/" className="text-xl font-black text-primary mb-8 px-4 italic tracking-tighter block hover:opacity-80 transition-opacity">
+          Plus Internet
+        </Link>
         
         <div className="flex items-center gap-3 mb-8 px-4">
           <div className="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container font-bold uppercase">
